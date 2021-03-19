@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>
+        Salesforce Embedded Log In Test Site
+    </title>
+
+    <!-- Style -->
+    <link rel="stylesheet" href="/style.css" type="text/css" /> 
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <!-- Visual JS -->
+    <script src="/helper.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jsforce/1.9.1/jsforce.min.js"></script>
+
+    <!-- Salesforce Embedded Log In Config -->
+    <meta name="salesforce-community" content="<%= community_url%>">
+    <meta name="salesforce-client-id" content="<%= app_id%>">
+    <meta name="salesforce-redirect-uri" content="<%= callback_url%>">
+    <meta name="salesforce-forgot-password-enabled" content="true">
+    <meta name="salesforce-logout-on-browser-close" content="true">
+    <meta name="salesforce-save-access-token" content="true">
+    <meta name="salesforce-self-register-starturl-enabled" content="true">
+
+    <!-- Salesforce Embedded Log In JavaScript Handlers -->
+    <meta name="salesforce-login-handler" content="onLogin">
+    <meta name="salesforce-logout-handler" content="onLogout">
+
+    <!-- Salesforce Embedded Log In Custom Config -->
+    <meta name="salesforce-mode" content="modal">
+    <meta name="salesforce-self-register-enabled" content="true">
+    <meta name="salesforce-target" content="#salesforce-login">
+
+    <!-- Salesforce Embedded Log In External Files -->
+    <link href="<%= community_url%>/servlet/servlet.loginwidgetcontroller?type=css" rel="stylesheet" type="text/css" /> 
+    <!-- <script src="<%= community_url%>/servlet/servlet.loginwidgetcontroller?type=javascript_widget" async defer></script> --> 
+    <script src="<%= static_asset_url %>" async defer></script>
+    <!-- --> 
+
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-header" style="background-image: url('<%= background%>');">
+            <div id="salesforce-login"><br /><a href="/logout">Logout</a></div>
+        </div>
+        <div class="profile-body">
+            <div id="contactDetails">
+                    <div class="card">
+                        <div class="card-header">
+                                Your Profile
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title"><%= contactRecords[0].FirstName %>&nbsp;<%= contactRecords[0].LastName %></h5>
+                            <p class="card-text">
+                                <%= contactRecords[0].Phone %><br />
+                                <%= contactRecords[0].Email %>
+                            </p>
+                            <a href="#" class="btn btn-primary">Update</a><br />
+                            <a href="/logout" class="btn">Logout</a>
+                        </div>
+                    </div>
+            </div>
+            <div id="profile-info">
+                <div id="wishes">
+                    <h3>Wishlist</h3>
+                    <div class="row">
+                        <% for(var i=0; i<wishes.length; i++) {%>
+                            <div class="col-sm-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                    <h5 class="card-title"><%= wishes[i].Wish_Detail__c %></h5>
+                                    <p class="card-text"><%= wishes[i].CreatedDate %></p>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+                <div id="searches">
+                    <h3>Search History</h3>
+                    <div class="row">
+                        <% for(var i=0; i<searchRecords.length; i++) {%>
+                            <div class="col-sm-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                    <h5 class="card-title"><%= searchRecords[i].Location__c %></h5>
+                                    <p class="card-text"><%= searchRecords[i].CreatedDate %></p>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>    
+                <div id="bookings">
+                    <h3>Past Bookings</h3>
+                    <div class="row">
+                        <% for(var i=0; i<bookingRecords.length; i++) {%>
+                            <div class="col-sm-3">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title"><%= bookingRecords[i].tourId__c %></h5>
+                                        <h6 class="card-subtitle mb-2 text-muted"></h6>
+                                        <p class="card-text"><%= bookingRecords[i].tourDate__c %></p>
+                                        <p class="card-text"><%= bookingRecords[i].tourType__c %></p>
+                                        <p class="card-text"><%= bookingRecords[i].numTickets__c %></p>
+                                        <a href="#" class="card-link">View details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>   
+            </div>
+        </div>
+    </div> 
+</body>
+</html>
