@@ -32,18 +32,19 @@
 
     <!-- Salesforce Embedded Log In Server Side -->
     <meta name="salesforce-server-callback" content="true">
+    <meta name="salesforce-mask-redirects" content="true">
     
 
     <!-- Salesforce Embedded Log In External Files -->
     <link href="<%= community_url%>/servlet/servlet.loginwidgetcontroller?type=css" rel="stylesheet" type="text/css" /> 
-    <script src="<%= community_url%>/servlet/servlet.loginwidgetcontroller?type=javascript_widget" async defer></script>
+    <script src="<%= community_url%>/servlet/servlet.loginwidgetcontroller?type=javascript_widget" async defer ></script>
     <!-- <script src="<%= static_asset_url %>" async defer></script> -->
     <!-- --> 
 
 </head>
 <body>
     <div class="index-container" style="background-image: url('<%= background%>');">
-        <div id="salesforce-login"></div>
+        <div style="top: -5px !important;" id="salesforce-login"></div>
     </div>
 
     
