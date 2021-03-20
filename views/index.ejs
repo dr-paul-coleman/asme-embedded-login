@@ -72,18 +72,21 @@
                 items: [
                     {
                         text: 'Embedded Login',
+                        plain: true,
                         handler: function () {
                             SFIDWidget.login();
                         }
                     },
                     {
                         text: 'Canvas API',
+                        plain: true,
                         handler: function () {
                             console.log(arguments);
                         }
                     },
                     {
                         text: 'REST/SCIM',
+                        plain: true,
                         handler: function () {
                             Ext.create("WF.view.LoginDialog").show()
                         }
