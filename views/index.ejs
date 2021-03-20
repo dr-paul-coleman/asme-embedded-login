@@ -36,7 +36,8 @@
     
 
     <!-- Salesforce Embedded Log In External Files -->
-    <link href="<%= community_url%>/servlet/servlet.loginwidgetcontroller?type=css" rel="stylesheet" type="text/css" /> 
+    <link href="http://extjs.cachefly.net/ext/gpl/4.2.1/resources/ext-theme-classic/ext-theme-classic-all.css" rel="stylesheet" type="text/css" />
+    <link href="<%= community_url%>/servlet/servlet.loginwidgetcontroller?type=css" rel="stylesheet" type="text/css" />
     <script src="<%= community_url%>/servlet/servlet.loginwidgetcontroller?type=javascript_widget" async defer ></script>
     <!-- <script src="<%= static_asset_url %>" async defer></script> -->
     <!-- --> 
@@ -52,6 +53,14 @@
         <div style="top: 4px !important;right: 51px !important;" id="salesforce-login"></div>
     </div>
 
-    
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+            crossorigin="anonymous" async defer>
+    </script>
+
+    <script src="/extjs/ext-all.js"/>
+    <script src="/extjs/LoginDialog.js"/>
+
 </body>
 </html>
