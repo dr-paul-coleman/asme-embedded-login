@@ -50,6 +50,7 @@
 </head>
 <body>
     <div class="index-container" style="background-image: url('<%= background%>');">
+        <div id="menu"></div>
         <div style="top: 4px !important;right: 51px !important;" id="salesforce-login"></div>
     </div>
 
@@ -61,7 +62,37 @@
     </script>
 
     <script src="/extjs/ext-all.js"></script>
-    <script src="/extjs/dlg/LoginDialog.js" async defer></script>
+
+    <script src="/extjs/dlg/LoginDialog.js" async defer>
+        //Ext.create("WF.view.LoginDialog").show()
+        Ext.onReady(function() {
+
+            new Ext.Button({
+                renderTo : 'menu',
+                text    : 'Demo Options',
+                menu : {
+                    items: [
+                        {text:'Embedded Login',
+                            handler : function() {
+                                SFIDWidget.login();
+                            }
+                        },
+                        {text:'Canvas API',
+                            handler : function() {
+                                console.log(arguments);
+                            }
+                        },
+                        {text:'REST/SCIM',
+                            handler : function() {
+                                console.log(arguments);
+                            }
+                        }]
+                }
+            });
+        });
+    </script>
+
+
 
 </body>
 </html>
