@@ -62,40 +62,48 @@
     </script>
 
     <script src="/extjs/ext-all.js"></script>
+    <script src="/extjs/dlg/LoginDialog.js"></script>
 
-    <script src="/extjs/dlg/LoginDialog.js" async defer>
+    <script>
+        Ext.Loader.setConfig({enabled: true});
+        Ext.Loader.setPath('ASME', '/extjs');
+        Ext.require([
+            'WF.view.*'
+        ]);
 
-        new Ext.Button({
-            renderTo : 'menu',
-            text    : 'Demo Options',
-            menu : {
-                items: [
-                    {
-                        text: 'Embedded Login',
-                        plain: true,
-                        handler: function () {
-                            SFIDWidget.login();
-                        }
-                    },
-                    {
-                        text: 'Canvas API',
-                        plain: true,
-                        handler: function () {
-                            console.log(arguments);
-                        }
-                    },
-                    {
-                        text: 'REST/SCIM',
-                        plain: true,
-                        handler: function () {
-                            Ext.create("WF.view.LoginDialog").show()
-                        }
-                    }]
-            }
-        });
+        Ext.onReady(function() {
+
+            Ext.defer(function() {
+                new Ext.Button({
+                    renderTo: 'menu',
+                    text: 'Demo Options',
+                    menu: {
+                        items: [
+                            {
+                                text: 'Embedded Login',
+                                plain: true,
+                                handler: function () {
+                                    SFIDWidget.login();
+                                }
+                            },
+                            {
+                                text: 'Canvas API',
+                                plain: true,
+                                handler: function () {
+                                    console.log(arguments);
+                                }
+                            },
+                            {
+                                text: 'REST/SCIM',
+                                plain: true,
+                                handler: function () {
+                                    Ext.create("WF.view.LoginDialog").show()
+                                }
+                            }]
+                    }
+                });
+            }, 1000);
+        }); //end Ext.onReady()
     </script>
-
-
-
 </body>
 </html>
