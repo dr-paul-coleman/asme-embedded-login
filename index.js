@@ -159,7 +159,8 @@ app.get('/server_callback', function(req, res){
         startURL = decodeURI(startURL);
     }
 
-    //Set up request body
+    // Do OAuth auth code exchange from callback flow
+    // Set up request body
     const body = {
         "code": code,
         "grant_type": "authorization_code",
@@ -168,7 +169,7 @@ app.get('/server_callback', function(req, res){
         "redirect_uri": OAUTH_CALLBACK_URL
     }
     
-    //Set up Callback
+    // Set up Callback
     const options = {
         method: 'POST',
         uri: COMMUNITY_URL + '/services/oauth2/token',
@@ -266,8 +267,100 @@ app.get('/logout', function(req, res){
         static_asset_url: STATIC_ASSET_URL
     }) 
 
-}); 
+});
 
+app.post('/login', function(req, res){
+    
+    console.log("Login AJAX: Body Parser payload is..." + JSON.stringify(req.body));
+    const username = req.body.username;
+    const password = req.body.password;
+
+    if (userval && passwdval) {
+
+        const body = {
+            "grant_type": "password",
+            "client_id": APP_ID,
+            "client_secret": APP_SECRET,
+            "redirect_uri": OAUTH_CALLBACK_URL,
+            "username": username,
+            "password": password
+        }
+
+
+        //Set up Callback
+        const options = {
+            method: 'POST',
+            uri: COMMUNITY_URL + '/services/oauth2/token',
+            form: body,
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            }
+        }
+
+        request(options).then(function (response) {
+
+            console.log("Login AJAX: Retrieved the access token successfully.");
+
+            //Parse response
+            responseJSON = JSON.parse(response);
+
+            console.log("Login AJAX: OAuth Payload is..." + JSON.stringify(responseJSON));
+
+            //Update refresh token
+            accessToken = responseJSON.access_token;
+
+            console.log("Login AJAX: Requesting the identity data...");
+
+            //Set up Callback
+            const options = {
+                method: 'GET',
+                uri: responseJSON.id + '?version=latest',
+                body: body,
+                json: true,
+                followAllRedirects: true,
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + accessToken
+                }
+            }
+
+            request(options).then(function (response) {
+
+                const JSONidentityResponse = JSON.parse(response);
+                console.log("Login AJAX: Retrieved identity data successfully..." + response);
+
+                JSONidentityResponse.access_token = accessToken;
+                const identity_response = Buffer.from(response).toString("base64");
+                const frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + accessToken + '&retURL=/asmehome';
+                const cookie = 'auth_token=' + accessToken + '&identity_response=' + identity_response;
+
+                res.json = {'frontdoor': frontdoor, 'cookie': cookie}
+
+                // const oneHourSeconds = 60 * 60;
+                // res.cookie('auth_token', accessToken,
+                //     { maxAge: oneHourSeconds,
+                //         httpOnly: false,
+                //         secure: false
+                //     });
+                //
+                // res.cookie('identity_response', identity_response,
+                //     { maxAge: oneHourSeconds,
+                //         httpOnly: false,
+                //         secure: false
+                //     });
+
+                //console.log("Login AJAX: Redirecting to community frontdoor.");
+                //res.redirect(COMMUNITY_URL + '/secur/frontdoor.jsp?sid='+ accessToken + '&retURL=/asmehome');
+
+            }).catch(function (err) {
+                console.log(err);
+            })
+
+        }).catch(function (err) {
+            console.log(err);
+        })
+    }
+});
 
 //Run
 app.listen(PORT, function () {
