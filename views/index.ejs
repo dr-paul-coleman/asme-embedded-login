@@ -97,7 +97,9 @@
                                 text: 'REST/SCIM',
                                 plain: true,
                                 handler: function () {
-                                    Ext.create("ASME.view.LoginRegistrationDialog").show()
+                                    window.dlg = Ext.create("ASME.view.LoginRegistrationDialog");
+                                    dlg.show();
+                                    window.cards = Ext.getCmp("wfLoginDlgCards").layout;
                                 }
                             },
                             {
