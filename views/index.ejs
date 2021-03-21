@@ -80,21 +80,14 @@
                     menu: {
                         items: [
                             {
-                                text: 'Embedded Login',
+                                text: 'Embedded Login (widget)',
                                 plain: true,
                                 handler: function () {
                                     SFIDWidget.login();
                                 }
                             },
                             {
-                                text: 'Canvas API',
-                                plain: true,
-                                handler: function () {
-                                    console.log(arguments);
-                                }
-                            },
-                            {
-                                text: 'REST/SCIM',
+                                text: 'REST/SCIM (client-side ux)',
                                 plain: true,
                                 handler: function () {
                                     window.dlg = Ext.create("ASME.view.LoginRegistrationDialog");
@@ -103,7 +96,7 @@
                                 }
                             },
                             {
-                                text: 'Logout',
+                                text: 'Logout (reset)',
                                 plain: true,
                                 handler: function () {
                                     window.location="/logout"
