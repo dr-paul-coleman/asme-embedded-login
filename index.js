@@ -7,14 +7,14 @@ const HOSTED_APP_URL = process.env.HOSTED_APP_URL;
 const BG_FAKE = process.env.BG_FAKE;
 const STATIC_ASSET_URL = process.env.STATIC_ASSET_URL;
 
-var express = require('express');
-var path = require('path');
-var app = express();
-var cookieParser = require('cookie-parser');
-var request = require('request-promise');
-var jsforce = require('jsforce');
-// const bodyParser = require('body-parser');
-// const cors = require('cors');
+const express = require('express');
+const path = require('path');
+const app = express();
+const cookieParser = require('cookie-parser');
+const request = require('request-promise');
+const jsforce = require('jsforce');
+const bodyParser = require('body-parser');
+const cors = require('cors');
 
 //App vars
 var refreshToken = "";
@@ -28,7 +28,6 @@ app.use(express.static(__dirname + '/public'));
 app.use(cookieParser());
 app.use(bodyParser.json())
 app.use(cors())
-app.use(sessionHandler)
 
 //Routes
 app.get('/', function(req, res){ 

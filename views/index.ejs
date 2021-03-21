@@ -112,5 +112,23 @@
             }, 1000);
         }); //end Ext.onReady()
     </script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jsforce/1.9.1/jsforce.min.js"></script>
+    <script>
+        jsforce.browser.init({
+            clientId: "<%= app_id%>",
+            redirectUri: "<%= callback_url%>"
+        });
+        jsforce.browser.on('connect', function(conn) {
+            conn.query('SELECT Id, Name FROM Account', function(err, res) {
+                if (err) { return console.error(err); }
+                console.log(res);
+            });
+        });
+
+        const jsflogin = function() {
+            jsforce.browser.login();
+        }
+    </script>
 </body>
 </html>
