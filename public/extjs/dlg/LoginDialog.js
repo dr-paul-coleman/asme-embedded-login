@@ -2,7 +2,7 @@
  * File: LoginDialog.js
  */
 
-Ext.define('WF.view.LoginDialog', {
+Ext.define('ASME.view.LoginDialog', {
     extend: 'Ext.window.Window',
 
     requires: [
@@ -13,7 +13,7 @@ Ext.define('WF.view.LoginDialog', {
     ],
 
     height: 206,
-    id: 'wfLoginDlg',
+    id: 'asmeLoginDlg',
     width: 375,
     resizable: false,
     layout: 'absolute',
@@ -35,7 +35,7 @@ Ext.define('WF.view.LoginDialog', {
                     fieldLabel: 'User Name',
                     labelWidth: 75,
                     tabIndex: 2,
-                    emptyText: 'Enter user@domain.com...'
+                    emptyText: 'e.g. user@asme.org'
                 },
                 {
                     xtype: 'textfield',
@@ -48,7 +48,7 @@ Ext.define('WF.view.LoginDialog', {
                     labelWidth: 75,
                     inputType: 'password',
                     tabIndex: 3,
-                    emptyText: 'Enter password...',
+                    emptyText: 'Enter password',
                     enableKeyEvents: true,
                     listeners: {
                         keyup: {
@@ -108,28 +108,24 @@ Ext.define('WF.view.LoginDialog', {
 
     onLoginDlgShow: function(component, eOpts) {
         var me = component;
-        if( $user && $user.Username ) {
-            Ext.defer( function() {
-                var username = $user.Username.split('@');
-                var domain = username[1].split(".");
-                username = domain.length>1? (username[0].replace('.','') +"@" + domain[0] + "." + domain[1]) : $user.Username;
-                me.queryById('wfLoginDlgUsernameField').setValue(username);
-                if (Ext.isEmpty(me.queryById('wfLoginDlgOrgLabel').getValue()) ) {
-                    me.queryById('wfLoginDlgOrgLabel').focus();
-                } else {
-                    me.queryById('wfLoginDlgPwdField').focus();
-                }
-            },100);
-        } else {
-            Ext.defer( function() {
-                if (Ext.isEmpty(me.queryById('wfLoginDlgOrgLabel').getValue()) ) {
-                    me.queryById('wfLoginDlgOrgLabel').focus();
-                } else {
-                    me.queryById('wfLoginDlgPwdField').focus();
-                }
-            },100);
-
-        }
+        // if( $user && $user.Username ) {
+        //     Ext.defer( function() {
+        //         var username = $user.Username.split('@');
+        //         var domain = username[1].split(".");
+        //         username = domain.length>1? (username[0].replace('.','') +"@" + domain[0] + "." + domain[1]) : $user.Username;
+        //         me.queryById('wfLoginDlgUsernameField').setValue(username);
+        //         if (Ext.isEmpty(me.queryById('wfLoginDlgOrgLabel').getValue()) ) {
+        //             me.queryById('wfLoginDlgOrgLabel').focus();
+        //         } else {
+        //             me.queryById('wfLoginDlgPwdField').focus();
+        //         }
+        //     },100);
+        // } else {
+        //     Ext.defer( function() {
+        //         me.queryById('wfLoginDlgPwdField').focus();
+        //     },100);
+        //
+        // }
     },
 
     onLoginButtonClick: function(button, e, eOpts) {

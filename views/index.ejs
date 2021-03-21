@@ -62,13 +62,13 @@
     </script>
 
     <script src="/extjs/ext-all.js"></script>
-    <script src="/extjs/dlg/LoginDialog.js"></script>
+    <script src="/extjs/dlg/ASMELoginDialog.js"></script>
 
     <script>
         Ext.Loader.setConfig({enabled: true});
         Ext.Loader.setPath('ASME', '/extjs');
         Ext.require([
-            'WF.view.*'
+            'ASME.view.*'
         ]);
 
         Ext.onReady(function() {
@@ -97,7 +97,7 @@
                                 text: 'REST/SCIM',
                                 plain: true,
                                 handler: function () {
-                                    Ext.create("WF.view.LoginDialog").show()
+                                    Ext.create("ASME.view.LoginRegistrationDialog").show()
                                 }
                             }]
                     }
