@@ -223,6 +223,9 @@ Ext.define('ASME.view.LoginRegistrationDialog', {
                                         }
                                     }
                                 }]
+                        },
+                        {
+                            xtype: 'uxiframe'
                         }]
             }],
             listeners: {
