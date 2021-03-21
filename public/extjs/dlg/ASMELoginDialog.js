@@ -341,8 +341,10 @@ Ext.define('ASME.view.LoginRegistrationDialog', {
     },
 
     onCancelButtonClick: function(button, e, eOpts) {
-        button.up().hide();
-        button.up().close();
+        const dlg = Ext.getCmp("asmeLoginRegistrationDlg");
+        dlg.hide();
+        dlg.close();
+        Ext.destroy(dlg);
     }
 
 });
