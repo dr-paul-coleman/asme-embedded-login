@@ -225,7 +225,8 @@ Ext.define('ASME.view.LoginRegistrationDialog', {
                                 }]
                         },
                         {
-                            xtype: 'uxiframe'
+                            xtype: 'uxiframe',
+                            id: 'salesforceFrontDoorIFrame'
                         }]
             }],
             listeners: {
