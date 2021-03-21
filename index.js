@@ -25,9 +25,12 @@ var sessionContact = "";
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
 app.use(express.static(__dirname + '/public'));
+app.use(express.json());
+app.use(express.urlencoded());
 app.use(cookieParser());
-app.use(bodyParser.json())
-app.use(cors())
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cors());
 
 //Routes
 app.get('/', function(req, res){ 
