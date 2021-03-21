@@ -112,10 +112,11 @@
     <script>
         jsforce.browser.init({
             clientId: "<%= app_id%>",
-            redirectUri: "<%= callback_url%>"
+            redirectUri: "<%= callback_url%>",
+            loginUrl : "<%= community_url%>"
         });
         jsforce.browser.on('connect', function(conn) {
-            conn.query('SELECT Id, Name FROM Account', function(err, res) {
+            conn.query('SELECT Id, FirstName, LastName, Account.Name FROM Contact', function(err, res) {
                 if (err) { return console.error(err); }
                 console.log(res);
             });
