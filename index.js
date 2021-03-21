@@ -13,6 +13,8 @@ var app = express();
 var cookieParser = require('cookie-parser');
 var request = require('request-promise');
 var jsforce = require('jsforce');
+// const bodyParser = require('body-parser');
+// const cors = require('cors');
 
 //App vars
 var refreshToken = "";
@@ -24,6 +26,9 @@ app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
 app.use(express.static(__dirname + '/public'));
 app.use(cookieParser());
+app.use(bodyParser.json())
+app.use(cors())
+app.use(sessionHandler)
 
 //Routes
 app.get('/', function(req, res){ 
@@ -212,10 +217,16 @@ app.get('/server_callback', function(req, res){
 
             var JSONidentityResponse = JSON.stringify(response);
             JSONidentityResponse.access_token = accessToken;
+            const oneDayToSeconds = 24 * 60 * 60;
+            res.cookie('userId', accessToken,
+                { maxAge: oneDayToSeconds,
+                    httpOnly: false,
+                    secure: false
+                    //secure: process.env.NODE_ENV === 'production'? true: false
+                });
 
             console.log("Server Callback Identity Response: " + JSONidentityResponse);
             sessionContact = response.custom_attributes.ContactID;
-
             res.render('server_callback', {
                 community_url: COMMUNITY_URL,
                 app_id: APP_ID,

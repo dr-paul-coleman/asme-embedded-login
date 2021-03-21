@@ -99,6 +99,13 @@
                                 handler: function () {
                                     Ext.create("ASME.view.LoginRegistrationDialog").show()
                                 }
+                            },
+                            {
+                                text: 'Logout',
+                                plain: true,
+                                handler: function () {
+                                    window.location="/logout"
+                                }
                             }]
                     }
                 });
