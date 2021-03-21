@@ -217,7 +217,7 @@ app.get('/server_callback', function(req, res){
             var JSONidentityResponse = JSON.stringify(response);
             JSONidentityResponse.access_token = accessToken;
             const oneHourSeconds = 60 * 60;
-            res.cookie('sid', accessToken,
+            res.cookie('auth_token', accessToken,
                 { maxAge: oneHourSeconds,
                     httpOnly: false,
                     secure: false
@@ -257,7 +257,7 @@ app.get('/logout', function(req, res){
     refreshToken = "";
     sessionContact = "";
 
-    res.clearCookie('sid');
+    res.clearCookie('auth_token');
     res.render('logout', {
         community_url: COMMUNITY_URL,
         app_id: APP_ID,
