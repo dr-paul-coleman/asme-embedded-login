@@ -284,7 +284,6 @@ app.post('/login', function(req, res){
             "grant_type": "password",
             "client_id": APP_ID,
             "client_secret": APP_SECRET,
-            "redirect_uri": OAUTH_CALLBACK_URL,
             "username": username,
             "password": password
         }
