@@ -97,14 +97,32 @@
                                 }
                             },
                             {
+                                text: 'API Client Library (jsforce)',
+                                plain: true,
+                                handler: function () {
+                                    jsforce.browser.login();
+                                }
+                            },
+                            {
                                 text: 'Logout (reset)',
                                 plain: true,
                                 handler: function () {
+                                    if( Ext ) {
+                                        Ext.util.Cookies.clear('accessToken');
+                                        Ext.util.Cookies.clear('instanceURL');
+                                        Ext.util.Cookies.clear('identity');
+                                    }
                                     window.location="/logout"
                                 }
                             }]
                     }
                 });
+
+                const access_token = Ext.util.Cookies.get('accessToken');
+                if( access_token ) {
+                    const instance_url = Ext.util.Cookies.get('instanceURL');
+                    $sfapi = new jsforce.Connection({'accessToken': access_token, 'instanceUrl': instance_url});
+                }
             }, 1000);
         }); //end Ext.onReady()
     </script>
@@ -116,16 +134,13 @@
             redirectUri: "<%= callback_url%>",
             loginUrl : "<%= community_url%>"
         });
+
         jsforce.browser.on('connect', function(conn) {
             conn.query('SELECT Id, FirstName, LastName, Account.Name FROM Contact', function(err, res) {
                 if (err) { return console.error(err); }
                 console.log(res);
             });
         });
-
-        const jsflogin = function() {
-            jsforce.browser.login();
-        }
 
     </script>
 </body>

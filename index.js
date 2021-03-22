@@ -230,7 +230,6 @@ app.get('/logout', function(req, res){
     refreshToken = "";
     sessionContact = "";
 
-    res.clearCookie('auth_token');
     res.render('logout', {
         community_url: COMMUNITY_URL,
         app_id: APP_ID,
