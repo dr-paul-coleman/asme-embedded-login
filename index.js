@@ -255,16 +255,16 @@ const doLogin = function(username, password, req, resp) {
 
 const doIdentity = function(username, password, req, resp) {
 
-    cp.exec("sfdx force:org:display -u " + username + " --json | ~/vendor/sfdx/jq/jq -r '.result'", (err, orgstdout) => {
+    cp.exec("sfdx force:org:display -u " + username + " --json | ~/vendor/sfdx/jq/jq -r '.result'", (err, stdout) => {
         if (err) {
             console.log(err);
             resp.end(JSON.stringify({'frontdoor': null, 'cookie': {access_token: null, instance_url: null }, 'identity': null}) );
 
         } else {
-            if( 'null' == orgstdout || null == orgstdout ) {
+            if( 'null' == stdout || null == stdout ) {
                 doJWTLogin(username, password, req, resp);
             } else {
-                const org = JSON.parse(orgstdout);
+                const org = JSON.parse(stdout);
                 if (org.accessToken && org.accessToken.startsWith('00D5w000003yStQ')) { //asme demo org
                     console.log("JWT Login: Access token obtained...")
 
@@ -310,12 +310,14 @@ const doJWTLogin = function(username, password, req, resp) {
 app.listen(PORT, function () {
     console.log('>>>>>>>>>>>>  Listening on port ' + PORT);
 
-    fs.writeFile('jwt.key', process.env.JWT_CERT, function (err) {
-        if (err) return console.log(err);
-        console.log('jwt cert saved.')
+    setTimeout( function() {
+        fs.writeFile('jwt.key', process.env.JWT_CERT, function (err) {
+            if (err) return console.log(err);
+            console.log('jwt cert saved.');
 
-        //cheat with a pre-login of demo user for speed improvement
-        doJWTLogin('paul.coleman@asme.org', '', {}, {end:function(){}})
-    });
+            //cheat with a pre-login of demo user for speed improvement
+            doJWTLogin('paul.coleman@asme.org', '', {}, {end: function () {}});
+        });
+    }, 100);
 });
 
