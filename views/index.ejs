@@ -123,7 +123,7 @@
                                 handler: function () {
                                     if( Ext ) {
                                         Ext.util.Cookies.clear('accessToken');
-                                        Ext.util.Cookies.clear('instanceURL');
+                                        Ext.util.Cookies.clear('instanceUrl');
                                         Ext.util.Cookies.clear('identity');
                                     }
                                     window.location="/logout"
@@ -134,7 +134,7 @@
 
                 const access_token = Ext.util.Cookies.get('accessToken');
                 if( access_token ) {
-                    const instance_url = Ext.util.Cookies.get('instanceURL');
+                    const instance_url = Ext.util.Cookies.get('instanceUrl');
                     $sfapi = new jsforce.Connection({'accessToken': access_token, 'instanceUrl': instance_url});
                 }
             }, 1);
