@@ -6,6 +6,7 @@ const OAUTH_CALLBACK_URL = process.env.OAUTH_CALLBACK_URL;
 const HOSTED_APP_URL = process.env.HOSTED_APP_URL;
 const BG_FAKE = process.env.BG_FAKE;
 const STATIC_ASSET_URL = process.env.STATIC_ASSET_URL;
+const ORG_TEST_USER = process.env.ORG_TEST_USER;
 
 const express = require('express');
 const path = require('path');
@@ -317,7 +318,9 @@ app.listen(PORT, function () {
             console.log('jwt cert saved.');
 
             //cheat with a pre-login of demo user for speed improvement
-            doJWTLogin('paul.coleman@asme.org', '', {}, {end: function () {}});
+            doJWTLogin(ORG_TEST_USER, '', {}, {end: function () {
+                    console.log('JWT Login cached for test user');
+                }});
         });
     }, 100);
 });
