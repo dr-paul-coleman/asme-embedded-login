@@ -74,7 +74,7 @@
                                 }
                             },
                             {
-                                text: 'REST/SCIM (client-side ux)',
+                                text: 'Frontdoor Login (custom ux)',
                                 plain: true,
                                 handler: function () {
                                     window.dlg = Ext.create("ASME.view.LoginRegistrationDialog");
@@ -83,21 +83,21 @@
                                 }
                             },
                             {
-                                text: 'API Client Library (jsforce)',
+                                text: 'API Client/OAuth (jsforce)',
                                 plain: true,
                                 handler: function () {
                                     jsforce.browser.login();
                                 }
                             },
                             {
-                                text: 'Coffe Fix Demo Site',
+                                text: 'Coffee Fix Demo Site',
                                 plain: true,
                                 handler: function () {
                                     window.open('https://fixcoffeestore.herokuapp.com','coffeefix')
                                 }
                             },
                             {
-                                text: 'Salesforce Portal',
+                                text: 'ASME Identity Portal',
                                 plain: true,
                                 handler: function () {
                                     window.open('https://npspdemo-1566cb41baa-157f7b2-171d20c3963.force.com/003','asmeorg')
@@ -108,6 +108,13 @@
                                 plain: true,
                                 handler: function () {
                                     window.open('https://developer.salesforce.com/docs/atlas.en-us.externalidentityImplGuide.meta/externalidentityImplGuide/external_identity_intro.htm','identitydev')
+                                }
+                            },
+                            {
+                                text: 'SCIM API Guide',
+                                plain: true,
+                                handler: function () {
+                                    window.open('https://help.salesforce.com/articleView?id=sf.identity_scim_overview.htm','scimdev')
                                 }
                             },
                             {
