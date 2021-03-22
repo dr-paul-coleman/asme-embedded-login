@@ -154,8 +154,6 @@ app.get('/server_callback', function(req, res){
         responseJSON = JSON.parse(response);
 
         console.log("Server Callback: Payload is..." + JSON.stringify(responseJSON));
-        
-        var idToken = responseJSON.id_token;
         var identity = responseJSON.id;
 
         //Update refresh token
@@ -243,93 +241,58 @@ app.post('/login', function(req, res){
     const password = req.body.password;
 
     if (username && password) {
-
-        const body = {
-            "grant_type": "password",
-            "client_id": APP_ID,
-            "client_secret": APP_SECRET,
-            "username": username,
-            "password": password
-        }
-
-        //Set up Callback
-        const options = {
-            method: 'POST',
-            uri: COMMUNITY_URL + '/services/oauth2/token',
-            form: body,
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded'
-            }
-        }
-
-        request(options).then(function (response) {
-
-            console.log("Login AJAX: Retrieved the access token successfully.");
-
-            //Parse response
-            responseJSON = JSON.parse(response);
-
-            console.log("Login AJAX: OAuth Payload is..." + JSON.stringify(responseJSON));
-
-            //Update refresh token
-            accessToken = responseJSON.access_token;
-
-            console.log("Login AJAX: Requesting the identity data...");
-
-            //Set up Callback
-            const options = {
-                method: 'GET',
-                uri: responseJSON.id + '?version=latest',
-                body: body,
-                json: true,
-                followAllRedirects: true,
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + accessToken
-                }
-            }
-
-            request(options).then(function (response) {
-
-                const JSONidentityResponse = JSON.parse(response);
-                console.log("Login AJAX: Retrieved identity data successfully..." + response);
-
-                JSONidentityResponse.access_token = accessToken;
-                const identity_response = Buffer.from(response).toString("base64");
-                const frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + accessToken + '&retURL=/asmehome';
-                const cookie = 'auth_token=' + accessToken + '&identity_response=' + identity_response;
-
-                res.json = {'frontdoor': frontdoor, 'cookie': cookie}
-
-            }).catch(function (err) {
-                console.log(err);
-            })
-
-        }).catch(function (err) {
-            console.log(err);
-        })
+        doJWTLogin( username, password, req, res )
     }
 });
 
-//Run
-app.listen(PORT, function () {
-  console.log('>>>>>>>>>>>>  Listening on port ' + PORT);
-});
-
-fs.writeFile('jwt.key', process.env.JWT_CERT, function (err) {
-    if (err) return console.log(err);
-});
-
-const doJWTLogin = function(username) {
+const doJWTLogin = function(username, password, req, res) {
+    //simplifying login access for a reusable pattern (a service account could be passed for User Provisioning)
     cp.exec("sfdx force:auth:jwt:grant -i $JWT_CLIENT_ID -f jwt.key -r $JWT_ORG_URL -s -a asme -u " + username, (err, stdout) => {
         console.log(stdout);
         if (stdout.startsWith("Successfully authorized")) {
             cp.exec("sfdx force:org:display -u asme --json | ~/vendor/sfdx/jq/jq -r '.result.accessToken'", (err, access_token) => {
-                if (err) return console.log(err);
-                if (access_token && access_token.startsWith('00D5w000003yStQ')) {
-                    accessToken = access_token;
+                if (err) {
+                    console.log(err);
+                    res.json = {'frontdoor': null, 'cookie': null}
+
+                } else {
+                    if (access_token && access_token.startsWith('00D5w000003yStQ')) { //asme demo org
+                        accessToken = access_token;
+
+                        let JSONidentityResponse = '';
+                        const frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + accessToken + '&retURL=/asmehome';
+                        let cookie = 'auth_token=' + accessToken + '&identity_response='
+
+                        console.log("JWT Login: Fetching profile information...")
+                        const $jsf = new jsforce.Connection({
+                            instanceUrl: COMMUNITY_URL,
+                            accessToken: accessToken
+                        });
+
+                        $jsf.identity(function (err, res) {
+                            if (err) {
+                                console.error(err);
+                            } else {
+                                JSONidentityResponse = JSON.stringify(res);
+                                console.log("JWT Login: Identity response..." + JSONidentityResponse)
+                                cookie += Buffer.from(JSONidentityResponse).toString("base64");
+                            }
+                            res.json = {'frontdoor': frontdoor, 'cookie': cookie}
+                        });
+
+                    }
                 }
             });
         }
     });
 }
+
+//Run
+app.listen(PORT, function () {
+    console.log('>>>>>>>>>>>>  Listening on port ' + PORT);
+
+    fs.writeFile('jwt.key', process.env.JWT_CERT, function (err) {
+        if (err) return console.log(err);
+    });
+});
+
