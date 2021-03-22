@@ -1,18 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>
-        Salesforce Embedded Log In Test Site
-    </title>
+    <title>ASME Test Site for Salesforce Embedded Log</title>
 
-    <!-- Style -->
-    <link rel="stylesheet" href="/style.css" type="text/css" /> 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- Salesforce Embedded Log In External Files -->
+    <link href="<%= community_url%>/servlet/servlet.loginwidgetcontroller?type=css" rel="stylesheet" type="text/css" />
+    <script src="<%= community_url%>/servlet/servlet.loginwidgetcontroller?type=javascript_widget" async defer ></script>
 
-    <!-- Visual JS -->
-    <script src="/helper.js"></script>
-
-    <!-- Salesforce Embedded Log In Config -->
+      <!-- Salesforce Embedded Log In Config -->
     <meta name="salesforce-community" content="<%= community_url%>">
     <meta name="salesforce-client-id" content="<%= app_id%>">
     <meta name="salesforce-redirect-uri" content="<%= callback_url%>">
@@ -22,10 +17,6 @@
     <meta name="salesforce-self-register-starturl-enabled" content="true">
     <meta name="salesforce-namespace" content="">
 
-    <!-- Salesforce Embedded Log In JavaScript Handlers -->
-    <meta name="salesforce-login-handler" content="onLogin">
-    <meta name="salesforce-logout-handler" content="onLogout">
-
     <!-- Salesforce Embedded Log In Custom Config -->
     <meta name="salesforce-mode" content="modal">
     <meta name="salesforce-self-register-enabled" content="true">
@@ -34,27 +25,24 @@
     <!-- Salesforce Embedded Log In Server Side -->
     <meta name="salesforce-server-callback" content="true">
     <meta name="salesforce-mask-redirects" content="true">
-    
 
-    <!-- Salesforce Embedded Log In External Files -->
+    <!-- Salesforce Embedded Log In JavaScript Handlers -->
+    <!-- <meta name="salesforce-login-handler" content="onLogin"> -->
+    <!-- <meta name="salesforce-logout-handler" content="onLogout"> -->
+
+
+    <!-- Other Demo Support Content -->
+    <link rel="stylesheet" href="/style.css" type="text/css" /> 
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link href="https://extjs.cachefly.net/ext/gpl/4.2.1/resources/ext-theme-classic/ext-theme-classic-all.css" rel="stylesheet" type="text/css" />
-    <link href="<%= community_url%>/servlet/servlet.loginwidgetcontroller?type=css" rel="stylesheet" type="text/css" />
-    <script src="<%= community_url%>/servlet/servlet.loginwidgetcontroller?type=javascript_widget" async defer ></script>
-    <!-- <script src="<%= static_asset_url %>" async defer></script> -->
-    <!-- --> 
+    <script src="/helper.js"></script>
 
-    <style>
-      #sfid-login-button {
-        width: 240px !important;
-      }
-    </style>
 </head>
 <body>
     <div class="index-container" style="background-image: url('<%= background%>');">
         <div id="menu"></div>
         <div style="display: none;" id="salesforce-login"></div>
     </div>
-
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
             integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
@@ -68,9 +56,7 @@
     <script>
         Ext.Loader.setConfig({enabled: true});
         Ext.Loader.setPath('ASME', '/extjs');
-        Ext.require([
-            'ASME.view.*'
-        ]);
+        Ext.require(['ASME.view.*']);
 
         Ext.onReady(function() {
 
@@ -123,7 +109,7 @@
                     const instance_url = Ext.util.Cookies.get('instanceURL');
                     $sfapi = new jsforce.Connection({'accessToken': access_token, 'instanceUrl': instance_url});
                 }
-            }, 1000);
+            }, 1);
         }); //end Ext.onReady()
     </script>
 
