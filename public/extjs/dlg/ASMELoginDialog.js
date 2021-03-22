@@ -278,12 +278,13 @@ Ext.define('ASME.view.LoginRegistrationDialog', {
                         success: function(res, status, http) {
                             if (res) {
                                 console.log( res );
-                                for (let key in res.cookie) {
-                                    if (res.cookie.hasOwnProperty(key)) {
-                                        document.cookie = key + '=' + res.cookie[key];
+                                const result = JSON.parse(res);
+                                for (let key in result.cookie) {
+                                    if (result.cookie.hasOwnProperty(key)) {
+                                        document.cookie = key + '=' + result.cookie[key];
                                     }
                                 }
-                                location = res.frontdoor;
+                                location = result.frontdoor;
                             }
                         }
                     });

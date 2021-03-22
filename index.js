@@ -24,7 +24,7 @@ const app = express();
 let refreshToken = "";
 let accessToken = "";
 let sessionContact = "";
-let defaultLoginResponse = {'frontdoor': null, 'cookie': {access_token: null, instance_url: null }, 'identity': null}
+let defaultLoginResponse = {'frontdoor': null, 'cookie': {access_token: null, instance_url: null, 'identity': null} }
 
 //Set up App
 app.set('view engine', 'ejs');
@@ -267,15 +267,15 @@ const doIdentity = function(username, password, req, resp) {
                 console.log("JWT Identity: No sfdx org for user, attempting login...")
                 doJWTLogin(username, password, req, resp);
             } else {
-                console.log(stdout);
+                //console.log(stdout);
                 const org = JSON.parse(stdout);
                 if (org.accessToken && org.accessToken.startsWith('00D5w000003yStQ')) { //asme demo org
                     console.log("JWT Identity: Access token obtained...")
 
                     defaultLoginResponse.frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + org.accessToken + '&retURL=/asmehome';
                     defaultLoginResponse.cookie = {'accessToken': org.accessToken, 'instanceUrl': org.instanceUrl};
-                    console.log(JSON.stringify(defaultLoginResponse.frontdoor));
-                    console.log(JSON.stringify(defaultLoginResponse.cookie));
+                    // console.log(JSON.stringify(defaultLoginResponse.frontdoor));
+                    // console.log(JSON.stringify(defaultLoginResponse.cookie));
 
                     console.log("JWT Identity: Fetching profile information...")
 
@@ -284,7 +284,7 @@ const doIdentity = function(username, password, req, resp) {
                             console.error(err);
                         } else {
                             console.log("JWT Login: Identity received...")
-                            defaultLoginResponse.identity = JSON.stringify(res);
+                            defaultLoginResponse.cookie.identity = JSON.stringify(res);
                         }
                         console.log("JWT Identity: Returning AJAX response...");
                         resp.end(JSON.stringify(defaultLoginResponse));
