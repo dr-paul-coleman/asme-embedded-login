@@ -261,7 +261,7 @@ const doJWTLogin = function(username, password, req, resp) {
                     resp.json = {'frontdoor': null, 'cookie': null}
 
                 } else {
-                    const {accessToken, instanceUrl, username, dxalias} = JSON.parse(org);
+                    const {accessToken, instanceUrl} = JSON.parse(org);
                     if (accessToken && accessToken.startsWith('00D5w000003yStQ')) { //asme demo org
 
                         let JSONidentityResponse = '';
