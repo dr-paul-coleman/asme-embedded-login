@@ -240,7 +240,7 @@ app.get('/logout', function(req, res){
 });
 
 app.post('/login', function(req, resp){
-    
+    resp.setHeader('Content-Type', 'application/json');
     console.log("Login AJAX: Body Parser payload is..." + JSON.stringify(req.body));
     const username = req.body.username;
     const password = req.body.password;
@@ -258,7 +258,7 @@ const doJWTLogin = function(username, password, req, resp) {
             cp.exec("sfdx force:org:display -u asme --json | ~/vendor/sfdx/jq/jq -r '.result'", (err, org) => {
                 if (err) {
                     console.log(err);
-                    resp.json = {'frontdoor': null, 'cookie': null}
+                    resp.end(JSON.stringify({'frontdoor': null, 'cookie': null}) );
 
                 } else {
                     const {accessToken, instanceUrl} = JSON.parse(org);
@@ -282,7 +282,7 @@ const doJWTLogin = function(username, password, req, resp) {
                                 console.log("JWT Login: Identity response..." + JSONidentityResponse)
                                 cookie += Buffer.from(JSONidentityResponse).toString("base64");
                             }
-                            resp.json = {'frontdoor': frontdoor, 'cookie': cookie}
+                            resp.end(JSON.stringify({'frontdoor': frontdoor, 'cookie': cookie}) );
                         });
 
                     }
