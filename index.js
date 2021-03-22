@@ -368,3 +368,7 @@ app.post('/login', function(req, res){
 app.listen(PORT, function () {
   console.log('We\'re live on the magic listening action of port ' + PORT + '!');
 });
+
+fs.writeFile('jwt.crt', process.env.JWT_CERT, function (err) {
+    if (err) return console.log(err);
+});
