@@ -21,9 +21,10 @@ const cp = require("child_process");
 const app = express();
 
 //App vars
-var refreshToken = "";
-var accessToken = "";
-var sessionContact = "";
+let refreshToken = "";
+let accessToken = "";
+let sessionContact = "";
+let defaultLoginResponse = {'frontdoor': null, 'cookie': {access_token: null, instance_url: null }, 'identity': null}
 
 //Set up App
 app.set('view engine', 'ejs');
@@ -259,35 +260,34 @@ const doIdentity = function(username, password, req, resp) {
     cp.exec("sfdx force:org:display -u " + username + " --json | ~/vendor/sfdx/jq/jq -r '.result'", (err, stdout) => {
         if (err) {
             console.log(err);
-            resp.end(JSON.stringify({'frontdoor': null, 'cookie': {access_token: null, instance_url: null }, 'identity': null}) );
+            resp.end(JSON.stringify(defaultLoginResponse) );
 
         } else {
             if( 'null' == stdout || null == stdout ) {
                 console.log("JWT Identity: No sfdx org for user, attempting login...")
                 doJWTLogin(username, password, req, resp);
             } else {
+                console.log(stdout);
                 const org = JSON.parse(stdout);
                 if (org.accessToken && org.accessToken.startsWith('00D5w000003yStQ')) { //asme demo org
                     console.log("JWT Identity: Access token obtained...")
 
-                    let response = {};
-                    response.frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + org.accessToken + '&retURL=/asmehome';
-                    response.cookie = {'accessToken': org.accessToken, 'instanceUrl': org.instanceUrl};
-                    console.log(JSON.stringify(org));
-                    console.log(JSON.stringify(response.frontdoor));
-                    console.log(JSON.stringify(response.cookie));
+                    defaultLoginResponse.frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + org.accessToken + '&retURL=/asmehome';
+                    defaultLoginResponse.cookie = {'accessToken': org.accessToken, 'instanceUrl': org.instanceUrl};
+                    console.log(JSON.stringify(defaultLoginResponse.frontdoor));
+                    console.log(JSON.stringify(defaultLoginResponse.cookie));
 
                     console.log("JWT Identity: Fetching profile information...")
 
-                    new jsforce.Connection(response.cookie).identity(function (err, res) {
+                    new jsforce.Connection(defaultLoginResponse.cookie).identity(function (err, res) {
                         if (err) {
                             console.error(err);
                         } else {
                             console.log("JWT Login: Identity received...")
-                            response.identity = JSON.stringify(res);
+                            defaultLoginResponse.identity = JSON.stringify(res);
                         }
                         console.log("JWT Identity: Returning AJAX response...");
-                        resp.end(JSON.stringify(response));
+                        resp.end(JSON.stringify(defaultLoginResponse));
                     });
 
                 }
@@ -303,7 +303,7 @@ const doJWTLogin = function(username, password, req, resp) {
         if (stdout.startsWith("Successfully authorized")) {
             doIdentity(username, password, req, resp);
         } else {
-            resp.end(JSON.stringify({'frontdoor': null, 'cookie': {access_token: null, instance_url: null }, 'identity': null}) );
+            resp.end( JSON.stringify(defaultLoginResponse) );
         }
     });
 }
