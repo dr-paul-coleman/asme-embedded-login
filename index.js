@@ -64,33 +64,36 @@ app.get('/profile', function(req, res){
     console.log("Profile Render: Fetching profile information...")
 
     //Grab Contact
-    var contactRecords = [];
-    var bookingRecords = [];
-    var searchRecords = [];
-    var wishes = [];
+    let contactRecords = [];
+    conn.identity(function (err, res) {
+        if (err) {
+            console.error(err);
+        } else {
+            conn.query("SELECT Id, FirstName, LastName, Phone, Email FROM Contact WHERE Id IN (SELECT ContactId FROM User WHERE Id = '"+res.Id+"')", function (err, result) {
+                if (err) {
+                    return console.error(err);
+                }
+                console.log("Profile Render: Contact result size is " + result.totalSize);
+                console.log("Profile Render: Number of contacts found is " + result.records.length);
 
-    //Grab Contact
-    conn.query("SELECT Id, FirstName, LastName, Phone, Email FROM Contact WHERE Id = '" + sessionContact + "'", function(err, result) {
-        if (err) { return console.error(err); }
-        console.log("Profile Render: Contact result size is " + result.totalSize);
-        console.log("Profile Render: Number of contacts found is " + result.records.length);
+                contactRecords = result.records;
+                console.log("Profile Render: Contact retrieved " + JSON.stringify(contactRecords));
+                console.log("Profile Render: Contact has external ID of " + contactRecords[0].customerID__c);
 
-        contactRecords = result.records;
-        console.log("Profile Render: Contact retrieved " + JSON.stringify(contactRecords));
-        console.log("Profile Render: Contact has external ID of " + contactRecords[0].customerID__c);
-
-        //Render the page once records are fetched
-        res.render('profile', {
-            community_url: COMMUNITY_URL,
-            app_id: APP_ID,
-            callback_url: OAUTH_CALLBACK_URL,
-            background: BG_FAKE,
-            static_asset_url: STATIC_ASSET_URL,
-            contactRecords: contactRecords,
-            bookingRecords: bookingRecords,
-            searchRecords: searchRecords,
-            wishes: wishes
-        })
+                //Render the page once records are fetched
+                res.render('profile', {
+                    community_url: COMMUNITY_URL,
+                    app_id: APP_ID,
+                    callback_url: OAUTH_CALLBACK_URL,
+                    background: BG_FAKE,
+                    static_asset_url: STATIC_ASSET_URL,
+                    contactRecords: contactRecords,
+                    bookingRecords: [],
+                    searchRecords: [],
+                    wishes: []
+                })
+            });
+        } //else identity query res
     });
 });
 
