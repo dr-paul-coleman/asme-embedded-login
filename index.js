@@ -255,13 +255,13 @@ const doJWTLogin = function(username, password, req, resp) {
     cp.exec("sfdx force:auth:jwt:grant -i $JWT_CLIENT_ID -f jwt.key -r $JWT_ORG_URL -s -a asme -u " + username, (err, stdout) => {
         console.log(stdout);
         if (stdout.startsWith("Successfully authorized")) {
-            cp.exec("sfdx force:org:display -u asme --json | ~/vendor/sfdx/jq/jq -r '.result'", (err, org) => {
+            cp.exec("sfdx force:org:display -u asme --json | ~/vendor/sfdx/jq/jq -r '.result'", (err, orgstdout) => {
                 if (err) {
                     console.log(err);
                     resp.end(JSON.stringify({'frontdoor': null, 'cookie': {access_token: null, instance_url: null }, 'identity': null}) );
 
                 } else {
-                    const org = JSON.parse(org);
+                    const org = JSON.parse(orgstdout);
                     if (org.accessToken && org.accessToken.startsWith('00D5w000003yStQ')) { //asme demo org
 
                         let response = {};
