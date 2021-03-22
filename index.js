@@ -258,15 +258,15 @@ const doJWTLogin = function(username, password, req, resp) {
             cp.exec("sfdx force:org:display -u asme --json | ~/vendor/sfdx/jq/jq -r '.result'", (err, org) => {
                 if (err) {
                     console.log(err);
-                    resp.end(JSON.stringify({'frontdoor': null, 'cookie': null}) );
+                    resp.end(JSON.stringify({'frontdoor': null, 'cookie': null, 'identity': null}) );
 
                 } else {
                     const {accessToken, instanceUrl} = JSON.parse(org);
                     if (accessToken && accessToken.startsWith('00D5w000003yStQ')) { //asme demo org
 
-                        let JSONidentityResponse = '';
-                        const frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + accessToken + '&retURL=/asmehome';
-                        let cookie = 'auth_token=' + accessToken + '&identity_response='
+                        let response = {};
+                        response.frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + accessToken + '&retURL=/asmehome';
+                        response.cookie = 'auth_token=' + accessToken + '&instance_url=' + instanceUrl;
 
                         console.log("JWT Login: Fetching profile information...")
                         const $jsf = new jsforce.Connection({
@@ -278,11 +278,9 @@ const doJWTLogin = function(username, password, req, resp) {
                             if (err) {
                                 console.error(err);
                             } else {
-                                JSONidentityResponse = JSON.stringify(res);
-                                console.log("JWT Login: Identity response..." + JSONidentityResponse)
-                                cookie += Buffer.from(JSONidentityResponse).toString("base64");
+                                response.identity = res;
                             }
-                            resp.end(JSON.stringify({'frontdoor': frontdoor, 'cookie': cookie}) );
+                            resp.end(JSON.stringify(response) );
                         });
 
                     }
