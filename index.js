@@ -262,10 +262,14 @@ const doJWTLogin = function(username, password, req, resp) {
                 } else {
                     const org = JSON.parse(orgstdout);
                     if (org.accessToken && org.accessToken.startsWith('00D5w000003yStQ')) { //asme demo org
+                        console.log("JWT Login: Access token obtained...")
 
                         let response = {};
                         response.frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + org.accessToken + '&retURL=/asmehome';
                         response.cookie = {'accessToken': org.accessToken, 'instanceUrl': org.instanceUrl};
+                        console.log( JSON.stringify(org) );
+                        console.log( JSON.stringify(response.frontdoor) );
+                        console.log( JSON.stringify(response.cookie) );
 
                         console.log("JWT Login: Fetching profile information...")
 
@@ -273,8 +277,10 @@ const doJWTLogin = function(username, password, req, resp) {
                             if (err) {
                                 console.error(err);
                             } else {
+                                console.log("JWT Login: Identity received...")
                                 response.identity = JSON.stringify(res);
                             }
+                            console.log("JWT Login: Returing AJAX response...")
                             resp.end( JSON.stringify(response) );
                         });
 

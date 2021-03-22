@@ -277,6 +277,7 @@ Ext.define('ASME.view.LoginRegistrationDialog', {
                         dataType: "text",
                         success: function(res, status, http) {
                             if (res) {
+                                console.log( res );
                                 for (let key in res.cookie) {
                                     if (res.cookie.hasOwnProperty(key)) {
                                         document.cookie = key + '=' + res.cookie[key];
