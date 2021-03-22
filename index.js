@@ -239,18 +239,18 @@ app.get('/logout', function(req, res){
 
 });
 
-app.post('/login', function(req, res){
+app.post('/login', function(req, resp){
     
     console.log("Login AJAX: Body Parser payload is..." + JSON.stringify(req.body));
     const username = req.body.username;
     const password = req.body.password;
 
     if (username && password) {
-        doJWTLogin( username, password, req, res )
+        doJWTLogin( username, password, req, resp )
     }
 });
 
-const doJWTLogin = function(username, password, req, res) {
+const doJWTLogin = function(username, password, req, resp) {
     //simplifying login access for a reusable pattern (a service account could be passed for User Provisioning)
     cp.exec("sfdx force:auth:jwt:grant -i $JWT_CLIENT_ID -f jwt.key -r $JWT_ORG_URL -s -a asme -u " + username, (err, stdout) => {
         console.log(stdout);
@@ -258,11 +258,11 @@ const doJWTLogin = function(username, password, req, res) {
             cp.exec("sfdx force:org:display -u asme --json | ~/vendor/sfdx/jq/jq -r '.result'", (err, org) => {
                 if (err) {
                     console.log(err);
-                    res.json = {'frontdoor': null, 'cookie': null}
+                    resp.json = {'frontdoor': null, 'cookie': null}
 
                 } else {
-                    console.log("JWT Login: SFDX display org information from stdout..." + org);
                     const {accessToken, instanceUrl, username, dxalias} = JSON.parse(org);
+                    console.log("JWT Login: SFDX display org information from stdout..." + JSON.stringify(org));
                     if (accessToken && accessToken.startsWith('00D5w000003yStQ')) { //asme demo org
 
                         let JSONidentityResponse = '';
@@ -284,7 +284,7 @@ const doJWTLogin = function(username, password, req, res) {
                                 console.log("JWT Login: Identity response..." + JSONidentityResponse)
                                 cookie += Buffer.from(JSONidentityResponse).toString("base64");
                             }
-                            res.json = {'frontdoor': frontdoor, 'cookie': cookie}
+                            resp.json = {'frontdoor': frontdoor, 'cookie': cookie}
                         });
 
                     }
