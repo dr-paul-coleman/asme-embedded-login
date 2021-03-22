@@ -241,7 +241,6 @@ app.get('/logout', function(req, res){
 
 app.post('/login', function(req, resp){
     resp.setHeader('Content-Type', 'application/json');
-    console.log("Login AJAX: Body Parser payload is..." + JSON.stringify(req.body));
     const username = req.body.username;
     const password = req.body.password;
 
@@ -265,22 +264,18 @@ const doJWTLogin = function(username, password, req, resp) {
                     if (org.accessToken && org.accessToken.startsWith('00D5w000003yStQ')) { //asme demo org
 
                         let response = {};
-                        response.frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + accessToken + '&retURL=/asmehome';
-                        response.cookie = {'auth_token': org.accessToken, 'instance_url': org.instanceUrl};
+                        response.frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + org.accessToken + '&retURL=/asmehome';
+                        response.cookie = {'accessToken': org.accessToken, 'instanceUrl': org.instanceUrl};
 
                         console.log("JWT Login: Fetching profile information...")
-                        const $jsf = new jsforce.Connection({
-                            'instanceUrl': org.instanceUrl,
-                            'accessToken': org.accessToken
-                        });
 
-                        $jsf.identity(function (err, res) {
+                        new jsforce.Connection(response.cookie).identity(function (err, res) {
                             if (err) {
                                 console.error(err);
                             } else {
                                 response.identity = JSON.stringify(res);
                             }
-                            resp.end(JSON.stringify(response) );
+                            resp.end( JSON.stringify(response) );
                         });
 
                     }
