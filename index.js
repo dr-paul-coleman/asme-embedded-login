@@ -262,12 +262,10 @@ const doJWTLogin = function(username, password, req, resp) {
 
                 } else {
                     const {accessToken, instanceUrl, username, dxalias} = JSON.parse(org);
-                    console.log("JWT Login: SFDX display org information from stdout..." + JSON.stringify(org));
                     if (accessToken && accessToken.startsWith('00D5w000003yStQ')) { //asme demo org
 
                         let JSONidentityResponse = '';
                         const frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + accessToken + '&retURL=/asmehome';
-                        /* TODO */ console.log( frontdoor ); //TODO REMOVE THIS FROM LOG PLEX
                         let cookie = 'auth_token=' + accessToken + '&identity_response='
 
                         console.log("JWT Login: Fetching profile information...")
