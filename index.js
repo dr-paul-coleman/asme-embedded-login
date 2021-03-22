@@ -315,7 +315,7 @@ app.listen(PORT, function () {
         console.log('jwt cert saved.')
 
         //cheat with a pre-login of demo user for speed improvement
-        doLogin('paul.coleman@asme.org', '', {}, {end:function(){}})
+        doJWTLogin('paul.coleman@asme.org', '', {}, {end:function(){}})
     });
 });
 
