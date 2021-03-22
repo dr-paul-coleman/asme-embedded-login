@@ -27,8 +27,8 @@
     <meta name="salesforce-mask-redirects" content="true">
 
     <!-- Salesforce Embedded Log In JavaScript Handlers -->
-    <!-- <meta name="salesforce-login-handler" content="onLogin"> -->
-    <!-- <meta name="salesforce-logout-handler" content="onLogout"> -->
+    <meta name="salesforce-login-handler" content="onLogin">
+    <meta name="salesforce-logout-handler" content="onLogout">
 
 
     <!-- Other Demo Support Content -->
@@ -122,6 +122,9 @@
         });
 
         jsforce.browser.on('connect', function(conn) {
+            Ext.util.Cookies.set('accessToken');
+            Ext.util.Cookies.set('instanceURL');
+
             conn.query('SELECT Id, FirstName, LastName, Account.Name FROM Contact', function(err, res) {
                 if (err) { return console.error(err); }
                 console.log(res);
