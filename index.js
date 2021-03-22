@@ -9,12 +9,15 @@ const STATIC_ASSET_URL = process.env.STATIC_ASSET_URL;
 
 const express = require('express');
 const path = require('path');
-const app = express();
 const cookieParser = require('cookie-parser');
 const request = require('request-promise');
 const jsforce = require('jsforce');
 const bodyParser = require('body-parser');
 const cors = require('cors');
+const fs = require('fs');
+const cp = require("child_process");
+
+const app = express();
 
 //App vars
 var refreshToken = "";
@@ -25,8 +28,6 @@ var sessionContact = "";
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
 app.use(express.static(__dirname + '/public'));
-//app.use(express.json());
-//app.use(express.urlencoded());
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -78,56 +79,20 @@ app.get('/profile', function(req, res){
         console.log("Profile Render: Contact retrieved " + JSON.stringify(contactRecords));
         console.log("Profile Render: Contact has external ID of " + contactRecords[0].customerID__c);
 
-        //Grab Wishlist
-        // conn.query("SELECT Contact__c,CreatedDate,Id,Wish_Detail__c FROM Wish__c WHERE Contact__c = '" + sessionContact + "'", function(err, result) {
-        //     if (err) { return console.error(err); }
-        //     console.log("Profile Render: Wishlist result size is " + result.totalSize);
-        //     console.log("Profile Render: Number of wishes found is " + result.records.length);
-        //
-        //     wishes = result.records;
-        //     console.log("Profile Render: wishes retrieved " + JSON.stringify(wishes));
-        //
-        //     //Grab Searches
-        //     conn.query("SELECT Contact__c,CreatedDate,Id,Location__c FROM Searches__c WHERE Contact__c = '" + sessionContact + "'", function(err, result) {
-        //         if (err) { return console.error(err); }
-        //         console.log("Profile Render: Search result size is " + result.totalSize);
-        //         console.log("Profile Render: Number of searches found is " + result.records.length);
-        //
-        //         searchRecords = result.records;
-        //         console.log("Profile Render: Searches retrieved " + JSON.stringify(searchRecords));
-        //
-        //         //Grab Bookings
-        //         conn.query("SELECT DisplayUrl, ExternalId, numTickets__c, tourDate__c, tourId__c, tourType__c FROM bookings__x WHERE customerId__c = '" + contactRecords[0].customerID__c + "' LIMIT 50", function(err, result) {
-        //             if (err) { return console.error(err); }
-        //             console.log("Profile Render: Bookings result size is " + result.totalSize);
-        //             console.log("Profile Render: Number of bookings found is " + result.records.length);
-        //
-        //             bookingRecords = result.records;
-        //             console.log("Profile Render: Bookings retrieved " + JSON.stringify(bookingRecords));
-
-
-                    //Render the page once records are fetched
-                    res.render('profile', {
-                        community_url: COMMUNITY_URL,
-                        app_id: APP_ID,
-                        callback_url: OAUTH_CALLBACK_URL,
-                        background: BG_FAKE,
-                        static_asset_url: STATIC_ASSET_URL,
-                        contactRecords: contactRecords,
-                        bookingRecords: bookingRecords,
-                        searchRecords: searchRecords,
-                        wishes: wishes
-                    }) 
-        
-            //     });
-            //
-            // });
-    
-        //});
-
+        //Render the page once records are fetched
+        res.render('profile', {
+            community_url: COMMUNITY_URL,
+            app_id: APP_ID,
+            callback_url: OAUTH_CALLBACK_URL,
+            background: BG_FAKE,
+            static_asset_url: STATIC_ASSET_URL,
+            contactRecords: contactRecords,
+            bookingRecords: bookingRecords,
+            searchRecords: searchRecords,
+            wishes: wishes
+        })
     });
-
-}); 
+});
 
 app.get('/_callback', function(req, res){ 
 
@@ -143,7 +108,6 @@ app.get('/_callback', function(req, res){
 app.get('/server_callback', function(req, res){ 
 
     console.log("Server Callback query: "+ JSON.stringify(req.query));
-
     console.log("Server Callback: Requesting the access token...");
 
     //Parse query string
@@ -288,7 +252,6 @@ app.post('/login', function(req, res){
             "password": password
         }
 
-
         //Set up Callback
         const options = {
             method: 'POST',
@@ -338,22 +301,6 @@ app.post('/login', function(req, res){
 
                 res.json = {'frontdoor': frontdoor, 'cookie': cookie}
 
-                // const oneHourSeconds = 60 * 60;
-                // res.cookie('auth_token', accessToken,
-                //     { maxAge: oneHourSeconds,
-                //         httpOnly: false,
-                //         secure: false
-                //     });
-                //
-                // res.cookie('identity_response', identity_response,
-                //     { maxAge: oneHourSeconds,
-                //         httpOnly: false,
-                //         secure: false
-                //     });
-
-                //console.log("Login AJAX: Redirecting to community frontdoor.");
-                //res.redirect(COMMUNITY_URL + '/secur/frontdoor.jsp?sid='+ accessToken + '&retURL=/asmehome');
-
             }).catch(function (err) {
                 console.log(err);
             })
@@ -366,9 +313,23 @@ app.post('/login', function(req, res){
 
 //Run
 app.listen(PORT, function () {
-  console.log('We\'re live on the magic listening action of port ' + PORT + '!');
+  console.log('>>>>>>>>>>>>  Listening on port ' + PORT);
 });
 
-fs.writeFile('jwt.crt', process.env.JWT_CERT, function (err) {
+fs.writeFile('jwt.key', process.env.JWT_CERT, function (err) {
     if (err) return console.log(err);
 });
+
+const doJWTLogin = function(username) {
+    cp.exec("sfdx force:auth:jwt:grant -i $JWT_CLIENT_ID -f jwt.key -r $JWT_ORG_URL -s -a asme -u " + username, (err, stdout) => {
+        console.log(stdout);
+        if (stdout.startsWith("Successfully authorized")) {
+            cp.exec("sfdx force:org:display -u asme --json | ~/vendor/sfdx/jq/jq -r '.result.accessToken'", (err, access_token) => {
+                if (err) return console.log(err);
+                if (access_token && access_token.startsWith('00D5w000003yStQ')) {
+                    accessToken = access_token;
+                }
+            });
+        }
+    });
+}
