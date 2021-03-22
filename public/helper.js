@@ -37,5 +37,5 @@ function onLogin(identity) {
 function onLogout() {
     SFIDWidget.init();
     console.log("Attempted to expire token and init. Redirecting...");
-    window.location="/";
+    window.location="https://npspdemo-1566cb41baa-157f7b2-171d20c3963.force.com/secur/logout.jsp?retUrl=https%3A%2F%2Fnpspdemo-1566cb41baa-157f7b2-171d20c3963.force.com%2FAsmeHome";
 }

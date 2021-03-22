@@ -6,24 +6,34 @@ const OAUTH_CALLBACK_URL = process.env.OAUTH_CALLBACK_URL;
 const HOSTED_APP_URL = process.env.HOSTED_APP_URL;
 const BG_FAKE = process.env.BG_FAKE;
 const STATIC_ASSET_URL = process.env.STATIC_ASSET_URL;
+const ORG_TEST_USER = process.env.ORG_TEST_USER;
 
-var express = require('express');
-var path = require('path');
-var app = express();
-var cookieParser = require('cookie-parser');
-var request = require('request-promise');
-var jsforce = require('jsforce');
+const express = require('express');
+const path = require('path');
+const cookieParser = require('cookie-parser');
+const request = require('request-promise');
+const jsforce = require('jsforce');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const fs = require('fs');
+const cp = require("child_process");
+
+const app = express();
 
 //App vars
-var refreshToken = "";
-var accessToken = "";
-var sessionContact = "";
+let refreshToken = "";
+let accessToken = "";
+let sessionContact = "";
+let defaultLoginResponse = {'frontdoor': null, 'cookie': {access_token: null, instance_url: null, 'identity': null} }
 
 //Set up App
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, '/views'));
 app.use(express.static(__dirname + '/public'));
 app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(cors());
 
 //Routes
 app.get('/', function(req, res){ 
@@ -56,71 +66,40 @@ app.get('/profile', function(req, res){
     console.log("Profile Render: Fetching profile information...")
 
     //Grab Contact
-    var contactRecords = [];
-    var bookingRecords = [];
-    var searchRecords = [];
-    var wishes = [];
+    let contactRecords = [];
+    conn.identity(function (err, res) {
+        if (err) {
+            console.error(err);
+        } else {
+            console.log("Profile Render: User identity..." + JSON.stringify(res));
 
-    //Grab Contact
-    conn.query("SELECT Id, FirstName, LastName, Phone, Email, customerID__c FROM Contact WHERE Id = '" + sessionContact + "'", function(err, result) {
-        if (err) { return console.error(err); }
-        console.log("Profile Render: Contact result size is " + result.totalSize);
-        console.log("Profile Render: Number of contacts found is " + result.records.length);
+            conn.query("SELECT Id, FirstName, LastName, Phone, Email FROM Contact WHERE Id IN (SELECT ContactId FROM User WHERE Id = '"+res.user_id+"') LIMIT 1", function (err, result) {
+                if (err) {
+                    return console.error(err);
+                }
+                console.log("Profile Render: Contact result size is " + result.totalSize);
+                console.log("Profile Render: Number of contacts found is " + result.records.length);
 
-        contactRecords = result.records;
-        console.log("Profile Render: Contact retrieved " + JSON.stringify(contactRecords));
-        console.log("Profile Render: Contact has external ID of " + contactRecords[0].customerID__c);
+                contactRecords = result.records;
+                console.log("Profile Render: Contact retrieved " + JSON.stringify(contactRecords));
+                console.log("Profile Render: Contact has external ID of " + contactRecords[0].customerID__c);
 
-        //Grab Wishlist
-        conn.query("SELECT Contact__c,CreatedDate,Id,Wish_Detail__c FROM Wish__c WHERE Contact__c = '" + sessionContact + "'", function(err, result) {
-            if (err) { return console.error(err); }
-            console.log("Profile Render: Wishlist result size is " + result.totalSize);
-            console.log("Profile Render: Number of wishes found is " + result.records.length);
-    
-            wishes = result.records;
-            console.log("Profile Render: wishes retrieved " + JSON.stringify(wishes));
-
-            //Grab Searches
-            conn.query("SELECT Contact__c,CreatedDate,Id,Location__c FROM Searches__c WHERE Contact__c = '" + sessionContact + "'", function(err, result) {
-                if (err) { return console.error(err); }
-                console.log("Profile Render: Search result size is " + result.totalSize);
-                console.log("Profile Render: Number of searches found is " + result.records.length);
-        
-                searchRecords = result.records;
-                console.log("Profile Render: Searches retrieved " + JSON.stringify(searchRecords));
-
-                //Grab Bookings
-                conn.query("SELECT DisplayUrl, ExternalId, numTickets__c, tourDate__c, tourId__c, tourType__c FROM bookings__x WHERE customerId__c = '" + contactRecords[0].customerID__c + "' LIMIT 50", function(err, result) {
-                    if (err) { return console.error(err); }
-                    console.log("Profile Render: Bookings result size is " + result.totalSize);
-                    console.log("Profile Render: Number of bookings found is " + result.records.length);
-            
-                    bookingRecords = result.records;
-                    console.log("Profile Render: Bookings retrieved " + JSON.stringify(bookingRecords));
-
-
-                    //Render the page once records are fetched
-                    res.render('profile', {
-                        community_url: COMMUNITY_URL,
-                        app_id: APP_ID,
-                        callback_url: OAUTH_CALLBACK_URL,
-                        background: BG_FAKE,
-                        static_asset_url: STATIC_ASSET_URL,
-                        contactRecords: contactRecords,
-                        bookingRecords: bookingRecords,
-                        searchRecords: searchRecords,
-                        wishes: wishes
-                    }) 
-        
-                });
-        
+                //Render the page once records are fetched
+                res.render('profile', {
+                    community_url: COMMUNITY_URL,
+                    app_id: APP_ID,
+                    callback_url: OAUTH_CALLBACK_URL,
+                    background: BG_FAKE,
+                    static_asset_url: STATIC_ASSET_URL,
+                    contactRecords: contactRecords,
+                    bookingRecords: [],
+                    searchRecords: [],
+                    wishes: []
+                })
             });
-    
-        });
-
+        } //else identity query res
     });
-
-}); 
+});
 
 app.get('/_callback', function(req, res){ 
 
@@ -136,7 +115,6 @@ app.get('/_callback', function(req, res){
 app.get('/server_callback', function(req, res){ 
 
     console.log("Server Callback query: "+ JSON.stringify(req.query));
-
     console.log("Server Callback: Requesting the access token...");
 
     //Parse query string
@@ -155,7 +133,8 @@ app.get('/server_callback', function(req, res){
         startURL = decodeURI(startURL);
     }
 
-    //Set up request body
+    // Do OAuth auth code exchange from callback flow
+    // Set up request body
     const body = {
         "code": code,
         "grant_type": "authorization_code",
@@ -164,7 +143,7 @@ app.get('/server_callback', function(req, res){
         "redirect_uri": OAUTH_CALLBACK_URL
     }
     
-    //Set up Callback
+    // Set up Callback
     const options = {
         method: 'POST',
         uri: COMMUNITY_URL + '/services/oauth2/token',
@@ -182,8 +161,6 @@ app.get('/server_callback', function(req, res){
         responseJSON = JSON.parse(response);
 
         console.log("Server Callback: Payload is..." + JSON.stringify(responseJSON));
-        
-        var idToken = responseJSON.id_token;
         var identity = responseJSON.id;
 
         //Update refresh token
@@ -210,11 +187,18 @@ app.get('/server_callback', function(req, res){
             console.log("Server Callback: Retrieved identity data successfully.");
             console.log("Server Callback: Creating redirect page.");
 
-            var JSONresponse = JSON.stringify(response);
+            var JSONidentityResponse = JSON.stringify(response);
+            JSONidentityResponse.access_token = accessToken;
+            const oneHourSeconds = 60 * 60;
+            res.cookie('auth_token', accessToken,
+                { maxAge: oneHourSeconds,
+                    httpOnly: false,
+                    secure: false
+                    //secure: process.env.NODE_ENV === 'production'? true: false
+                });
 
-            console.log("Server Callback Identity Response: " + JSONresponse);
+            console.log("Server Callback Identity Response: " + JSONidentityResponse);
             sessionContact = response.custom_attributes.ContactID;
-
             res.render('server_callback', {
                 community_url: COMMUNITY_URL,
                 app_id: APP_ID,
@@ -222,7 +206,7 @@ app.get('/server_callback', function(req, res){
                 start_url: startURL,
                 hosted_app_url: HOSTED_APP_URL,
                 static_asset_url: STATIC_ASSET_URL,
-                identity_response: Buffer.from(JSONresponse).toString("base64")
+                identity_response: Buffer.from(JSONidentityResponse).toString("base64")
             }) 
 
         })
@@ -246,7 +230,6 @@ app.get('/logout', function(req, res){
     refreshToken = "";
     sessionContact = "";
 
-    //
     res.render('logout', {
         community_url: COMMUNITY_URL,
         app_id: APP_ID,
@@ -255,10 +238,86 @@ app.get('/logout', function(req, res){
         static_asset_url: STATIC_ASSET_URL
     }) 
 
-}); 
+});
 
+app.post('/login', function(req, resp){
+    resp.setHeader('Content-Type', 'application/json');
+    const username = req.body.username;
+    const password = req.body.password;
+
+    if (username && password) {
+        doLogin( username, password, req, resp )
+    }
+});
+
+const doLogin = function(username, password, req, resp) {
+    doIdentity(username, password, req, resp);
+}
+
+const doIdentity = function(username, password, req, resp) {
+
+    cp.exec("sfdx force:org:display -u " + username + " --json | ~/vendor/sfdx/jq/jq -r '.result'", (err, stdout) => {
+        if (err) {
+            console.log(err);
+            resp.end(JSON.stringify(defaultLoginResponse) );
+
+        } else {
+            if( 'null' == stdout || null == stdout ) {
+                console.log("JWT Identity: No sfdx org for user, attempting login...")
+                doJWTLogin(username, password, req, resp);
+            } else {
+                const org = JSON.parse(stdout);
+                if (org.accessToken && org.accessToken.startsWith('00D5w000003yStQ')) { //asme demo org
+                    console.log("JWT Identity: Access token obtained...")
+
+                    defaultLoginResponse.frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + org.accessToken + '&retURL=/asmehome';
+                    defaultLoginResponse.cookie = {'accessToken': org.accessToken, 'instanceUrl': org.instanceUrl};
+
+                    console.log("JWT Identity: Fetching profile information...")
+
+                    new jsforce.Connection(defaultLoginResponse.cookie).identity(function (err, res) {
+                        if (err) {
+                            console.error(err);
+                        } else {
+                            console.log("JWT Login: Identity received...")
+                            defaultLoginResponse.cookie.identity = JSON.stringify(res);
+                        }
+                        console.log("JWT Identity: Returning AJAX response...");
+                        resp.end(JSON.stringify(defaultLoginResponse));
+                    });
+
+                }
+            }
+        }
+    });
+}
+
+const doJWTLogin = function(username, password, req, resp) {
+//simplifying login access for a reusable pattern (a service account could be passed for User Provisioning)
+    cp.exec("sfdx force:auth:jwt:grant -i $JWT_CLIENT_ID -f jwt.key -r $JWT_ORG_URL -s -u " + username, (err, stdout) => {
+        console.log(stdout);
+        if (stdout.startsWith("Successfully authorized")) {
+            doIdentity(username, password, req, resp);
+        } else {
+            resp.end( JSON.stringify(defaultLoginResponse) );
+        }
+    });
+}
 
 //Run
 app.listen(PORT, function () {
-  console.log('We\'re live on the magic listening action of port ' + PORT + '!');
+    console.log('>>>>>>>>>>>>  Listening on port ' + PORT);
+
+    setTimeout( function() {
+        fs.writeFile('jwt.key', process.env.JWT_CERT, function (err) {
+            if (err) return console.log(err);
+            console.log('jwt cert saved.');
+
+            //cheat with a pre-login of demo user for speed improvement
+            doJWTLogin(ORG_TEST_USER, '', {}, {end: function () {
+                    console.log('JWT Login cached for test user');
+                }});
+        });
+    }, 100);
 });
+

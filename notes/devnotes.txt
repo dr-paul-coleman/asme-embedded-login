@@ -1,0 +1,2 @@
+ASME redir url pattern for frontdoor access
+https://npspdemo-1566cb41baa-157f7b2-171d20c3963.force.com/secur/frontdoor.jsp?sid=[access_token]]&retURL=/asmehome

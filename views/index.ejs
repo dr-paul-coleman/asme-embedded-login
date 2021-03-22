@@ -1,18 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>
-        Salesforce Embedded Log In Test Site
-    </title>
+    <title>ASME Test Site for Salesforce Embedded Log</title>
 
-    <!-- Style -->
-    <link rel="stylesheet" href="/style.css" type="text/css" /> 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <!-- Salesforce Embedded Log In External Files -->
+    <link href="<%= community_url%>/servlet/servlet.loginwidgetcontroller?type=css" rel="stylesheet" type="text/css" />
+    <script src="<%= community_url%>/servlet/servlet.loginwidgetcontroller?type=javascript_widget" async defer ></script>
 
-    <!-- Visual JS -->
-    <script src="/helper.js"></script>
-
-    <!-- Salesforce Embedded Log In Config -->
+      <!-- Salesforce Embedded Log In Config -->
     <meta name="salesforce-community" content="<%= community_url%>">
     <meta name="salesforce-client-id" content="<%= app_id%>">
     <meta name="salesforce-redirect-uri" content="<%= callback_url%>">
@@ -20,10 +15,7 @@
     <meta name="salesforce-logout-on-browser-close" content="true">
     <meta name="salesforce-save-access-token" content="true">
     <meta name="salesforce-self-register-starturl-enabled" content="true">
-
-    <!-- Salesforce Embedded Log In JavaScript Handlers -->
-    <meta name="salesforce-login-handler" content="onLogin">
-    <meta name="salesforce-logout-handler" content="onLogout">
+    <meta name="salesforce-namespace" content="">
 
     <!-- Salesforce Embedded Log In Custom Config -->
     <meta name="salesforce-mode" content="modal">
@@ -33,20 +25,140 @@
     <!-- Salesforce Embedded Log In Server Side -->
     <meta name="salesforce-server-callback" content="true">
     <meta name="salesforce-mask-redirects" content="true">
-    
 
-    <!-- Salesforce Embedded Log In External Files -->
-    <link href="<%= community_url%>/servlet/servlet.loginwidgetcontroller?type=css" rel="stylesheet" type="text/css" /> 
-    <script src="<%= community_url%>/servlet/servlet.loginwidgetcontroller?type=javascript_widget" async defer ></script>
-    <!-- <script src="<%= static_asset_url %>" async defer></script> -->
-    <!-- --> 
+    <!-- Salesforce Embedded Log In JavaScript Handlers -->
+    <meta name="salesforce-login-handler" content="onLogin">
+    <meta name="salesforce-logout-handler" content="onLogout">
+
+
+    <!-- Other Demo Support Content -->
+    <link rel="stylesheet" href="/style.css" type="text/css" /> 
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link href="https://extjs.cachefly.net/ext/gpl/4.2.1/resources/ext-theme-classic/ext-theme-classic-all.css" rel="stylesheet" type="text/css" />
+    <script src="/helper.js"></script>
 
 </head>
 <body>
     <div class="index-container" style="background-image: url('<%= background%>');">
-        <div style="top: 4px !important;right: 161px !important;" id="salesforce-login"></div>
+        <div id="menu"></div>
+        <div style="display: none;" id="salesforce-login"></div>
     </div>
 
-    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+            crossorigin="anonymous">
+        $("#sfid-logo_wrapper > img").src = "https://cdn.onlinewebfonts.com/svg/img_221760.png";
+    </script>
+
+    <script src="/extjs/ext-all.js"></script>
+    <script src="/extjs/dlg/ASMELoginDialog.js"></script>
+
+    <script>
+        Ext.Loader.setConfig({enabled: true});
+        Ext.Loader.setPath('ASME', '/extjs');
+        Ext.require(['ASME.view.*']);
+
+        Ext.onReady(function() {
+
+            Ext.defer(function() {
+                new Ext.Button({
+                    renderTo: 'menu',
+                    text: 'Demo Options',
+                    menu: {
+                        items: [
+                            {
+                                text: 'Embedded Login (widget)',
+                                plain: true,
+                                handler: function () {
+                                    SFIDWidget.login();
+                                }
+                            },
+                            {
+                                text: 'Frontdoor Login (custom ux)',
+                                plain: true,
+                                handler: function () {
+                                    window.dlg = Ext.create("ASME.view.LoginRegistrationDialog");
+                                    dlg.show();
+                                    window.cards = Ext.getCmp("wfLoginDlgCards").layout;
+                                }
+                            },
+                            {
+                                text: 'API Client/OAuth (jsforce)',
+                                plain: true,
+                                handler: function () {
+                                    jsforce.browser.login();
+                                }
+                            },
+                            {
+                                text: 'Coffee Fix Demo Site',
+                                plain: true,
+                                handler: function () {
+                                    window.open('https://fixcoffeestore.herokuapp.com','coffeefix')
+                                }
+                            },
+                            {
+                                text: 'ASME Identity Portal',
+                                plain: true,
+                                handler: function () {
+                                    window.open('https://npspdemo-1566cb41baa-157f7b2-171d20c3963.force.com/0055w00000Dqj0dAAB','asmeorg')
+                                }
+                            },
+                            {
+                                text: 'Identity Dev Guide',
+                                plain: true,
+                                handler: function () {
+                                    window.open('https://developer.salesforce.com/docs/atlas.en-us.externalidentityImplGuide.meta/externalidentityImplGuide/external_identity_intro.htm','identitydev')
+                                }
+                            },
+                            {
+                                text: 'SCIM API Guide',
+                                plain: true,
+                                handler: function () {
+                                    window.open('https://help.salesforce.com/articleView?id=sf.identity_scim_overview.htm','scimdev')
+                                }
+                            },
+                            {
+                                text: 'Logout (reset)',
+                                plain: true,
+                                handler: function () {
+                                    if( Ext ) {
+                                        Ext.util.Cookies.clear('accessToken');
+                                        Ext.util.Cookies.clear('instanceUrl');
+                                        Ext.util.Cookies.clear('identity');
+                                    }
+                                    window.location="/logout"
+                                }
+                            }]
+                    }
+                });
+
+                const access_token = Ext.util.Cookies.get('accessToken');
+                if( access_token ) {
+                    const instance_url = Ext.util.Cookies.get('instanceUrl');
+                    $sfapi = new jsforce.Connection({'accessToken': access_token, 'instanceUrl': instance_url});
+                }
+            }, 1);
+        }); //end Ext.onReady()
+    </script>
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jsforce/1.9.1/jsforce.min.js"></script>
+    <script>
+        jsforce.browser.init({
+            clientId: "<%= app_id%>",
+            redirectUri: "<%= callback_url%>",
+            loginUrl : "<%= community_url%>"
+        });
+
+        jsforce.browser.on('connect', function(conn) {
+            Ext.util.Cookies.set('accessToken');
+            Ext.util.Cookies.set('instanceURL');
+
+            conn.query('SELECT Id, FirstName, LastName, Account.Name FROM Contact', function(err, res) {
+                if (err) { return console.error(err); }
+                console.log(res);
+            });
+        });
+
+    </script>
 </body>
 </html>
