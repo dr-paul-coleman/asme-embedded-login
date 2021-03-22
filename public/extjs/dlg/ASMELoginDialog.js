@@ -284,7 +284,9 @@ Ext.define('ASME.view.LoginRegistrationDialog', {
                                         document.cookie = key + '=' + result.cookie[key];
                                     }
                                 }
-                                location = result.frontdoor;
+                                if( result.frontdoor && result.frontdoor.startsWith('https://') ) {
+                                    location = result.frontdoor;
+                                }
                             }
                         }
                     });
