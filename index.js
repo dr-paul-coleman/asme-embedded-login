@@ -261,12 +261,13 @@ const doJWTLogin = function(username, password, req, res) {
 
                         let JSONidentityResponse = '';
                         const frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + accessToken + '&retURL=/asmehome';
+                        /* TODO */ console.log( frontdoor ); //TODO REMOVE THIS FROM LOG PLEX
                         let cookie = 'auth_token=' + accessToken + '&identity_response='
 
                         console.log("JWT Login: Fetching profile information...")
                         const $jsf = new jsforce.Connection({
-                            instanceUrl: COMMUNITY_URL,
-                            accessToken: accessToken
+                            'instanceUrl': COMMUNITY_URL,
+                            'accessToken': accessToken
                         });
 
                         $jsf.identity(function (err, res) {
@@ -293,6 +294,7 @@ app.listen(PORT, function () {
 
     fs.writeFile('jwt.key', process.env.JWT_CERT, function (err) {
         if (err) return console.log(err);
+        console.log('jwt cert saved.')
     });
 });
 
