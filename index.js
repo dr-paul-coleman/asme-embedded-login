@@ -266,15 +266,12 @@ const doIdentity = function(username, password, req, resp) {
                 console.log("JWT Identity: No sfdx org for user, attempting login...")
                 doJWTLogin(username, password, req, resp);
             } else {
-                //console.log(stdout);
                 const org = JSON.parse(stdout);
                 if (org.accessToken && org.accessToken.startsWith('00D5w000003yStQ')) { //asme demo org
                     console.log("JWT Identity: Access token obtained...")
 
                     defaultLoginResponse.frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + org.accessToken + '&retURL=/asmehome';
                     defaultLoginResponse.cookie = {'accessToken': org.accessToken, 'instanceUrl': org.instanceUrl};
-                    // console.log(JSON.stringify(defaultLoginResponse.frontdoor));
-                    // console.log(JSON.stringify(defaultLoginResponse.cookie));
 
                     console.log("JWT Identity: Fetching profile information...")
 
