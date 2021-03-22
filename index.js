@@ -69,7 +69,9 @@ app.get('/profile', function(req, res){
         if (err) {
             console.error(err);
         } else {
-            conn.query("SELECT Id, FirstName, LastName, Phone, Email FROM Contact WHERE Id IN (SELECT ContactId FROM User WHERE Id = '"+res.Id+"')", function (err, result) {
+            console.log("Profile Render: User identity..." + JSON.stringify(res));
+
+            conn.query("SELECT Id, FirstName, LastName, Phone, Email FROM Contact WHERE Id IN (SELECT ContactId FROM User WHERE Id = '"+res.user_id+"') LIMIT 1", function (err, result) {
                 if (err) {
                     return console.error(err);
                 }
@@ -253,14 +255,15 @@ const doJWTLogin = function(username, password, req, res) {
     cp.exec("sfdx force:auth:jwt:grant -i $JWT_CLIENT_ID -f jwt.key -r $JWT_ORG_URL -s -a asme -u " + username, (err, stdout) => {
         console.log(stdout);
         if (stdout.startsWith("Successfully authorized")) {
-            cp.exec("sfdx force:org:display -u asme --json | ~/vendor/sfdx/jq/jq -r '.result.accessToken'", (err, access_token) => {
+            cp.exec("sfdx force:org:display -u asme --json | ~/vendor/sfdx/jq/jq -r '.result'", (err, org) => {
                 if (err) {
                     console.log(err);
                     res.json = {'frontdoor': null, 'cookie': null}
 
                 } else {
-                    if (access_token && access_token.startsWith('00D5w000003yStQ')) { //asme demo org
-                        accessToken = access_token;
+                    console.log("JWT Login: SFDX display org information from stdout..." + org);
+                    const {accessToken, instanceUrl, username, dxalias} = JSON.parse(org);
+                    if (accessToken && accessToken.startsWith('00D5w000003yStQ')) { //asme demo org
 
                         let JSONidentityResponse = '';
                         const frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + accessToken + '&retURL=/asmehome';
@@ -269,7 +272,7 @@ const doJWTLogin = function(username, password, req, res) {
 
                         console.log("JWT Login: Fetching profile information...")
                         const $jsf = new jsforce.Connection({
-                            'instanceUrl': COMMUNITY_URL,
+                            'instanceUrl': instanceUrl,
                             'accessToken': accessToken
                         });
 
