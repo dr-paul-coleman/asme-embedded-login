@@ -70,7 +70,7 @@ Ext.define('ASME.view.LoginRegistrationDialog', {
                                 id:"notAMemberLbl",
                                 x: 35,
                                 y: 135,
-                                html: "Create and Account",
+                                html: "Create an Account",
                                 style: {
                                     'font-size': '10.2px',
                                     'text-decoration': 'none',
