@@ -245,48 +245,63 @@ app.post('/login', function(req, resp){
     const password = req.body.password;
 
     if (username && password) {
-        doJWTLogin( username, password, req, resp )
+        doLogin( username, password, req, resp )
     }
 });
 
+const doLogin = function(username, password, req, resp) {
+    doIdentity(username, password, req, resp);
+}
+
+const doIdentity = function(username, password, req, resp) {
+
+    cp.exec("sfdx force:org:display -u " + username + " --json | ~/vendor/sfdx/jq/jq -r '.result'", (err, orgstdout) => {
+        if (err) {
+            console.log(err);
+            resp.end(JSON.stringify({'frontdoor': null, 'cookie': {access_token: null, instance_url: null }, 'identity': null}) );
+
+        } else {
+            if( 'null' == orgstdout || null == orgstdout ) {
+                doJWTLogin(username, password, req, resp);
+            } else {
+                const org = JSON.parse(orgstdout);
+                if (org.accessToken && org.accessToken.startsWith('00D5w000003yStQ')) { //asme demo org
+                    console.log("JWT Login: Access token obtained...")
+
+                    let response = {};
+                    response.frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + org.accessToken + '&retURL=/asmehome';
+                    response.cookie = {'accessToken': org.accessToken, 'instanceUrl': org.instanceUrl};
+                    console.log(JSON.stringify(org));
+                    console.log(JSON.stringify(response.frontdoor));
+                    console.log(JSON.stringify(response.cookie));
+
+                    console.log("JWT Login: Fetching profile information...")
+
+                    new jsforce.Connection(response.cookie).identity(function (err, res) {
+                        if (err) {
+                            console.error(err);
+                        } else {
+                            console.log("JWT Login: Identity received...")
+                            response.identity = JSON.stringify(res);
+                        }
+                        console.log("JWT Login: Returing AJAX response...")
+                        resp.end(JSON.stringify(response));
+                    });
+
+                }
+            }
+        }
+    });
+}
+
 const doJWTLogin = function(username, password, req, resp) {
-    //simplifying login access for a reusable pattern (a service account could be passed for User Provisioning)
-    cp.exec("sfdx force:auth:jwt:grant -i $JWT_CLIENT_ID -f jwt.key -r $JWT_ORG_URL -s -a asme -u " + username, (err, stdout) => {
+//simplifying login access for a reusable pattern (a service account could be passed for User Provisioning)
+    cp.exec("sfdx force:auth:jwt:grant -i $JWT_CLIENT_ID -f jwt.key -r $JWT_ORG_URL -s -u " + username, (err, stdout) => {
         console.log(stdout);
         if (stdout.startsWith("Successfully authorized")) {
-            cp.exec("sfdx force:org:display -u asme --json | ~/vendor/sfdx/jq/jq -r '.result'", (err, orgstdout) => {
-                if (err) {
-                    console.log(err);
-                    resp.end(JSON.stringify({'frontdoor': null, 'cookie': {access_token: null, instance_url: null }, 'identity': null}) );
-
-                } else {
-                    const org = JSON.parse(orgstdout);
-                    if (org.accessToken && org.accessToken.startsWith('00D5w000003yStQ')) { //asme demo org
-                        console.log("JWT Login: Access token obtained...")
-
-                        let response = {};
-                        response.frontdoor = COMMUNITY_URL + '/secur/frontdoor.jsp?sid=' + org.accessToken + '&retURL=/asmehome';
-                        response.cookie = {'accessToken': org.accessToken, 'instanceUrl': org.instanceUrl};
-                        console.log( JSON.stringify(org) );
-                        console.log( JSON.stringify(response.frontdoor) );
-                        console.log( JSON.stringify(response.cookie) );
-
-                        console.log("JWT Login: Fetching profile information...")
-
-                        new jsforce.Connection(response.cookie).identity(function (err, res) {
-                            if (err) {
-                                console.error(err);
-                            } else {
-                                console.log("JWT Login: Identity received...")
-                                response.identity = JSON.stringify(res);
-                            }
-                            console.log("JWT Login: Returing AJAX response...")
-                            resp.end( JSON.stringify(response) );
-                        });
-
-                    }
-                }
-            });
+            doIdentity(username, password, req, resp);
+        } else {
+            resp.end(JSON.stringify({'frontdoor': null, 'cookie': {access_token: null, instance_url: null }, 'identity': null}) );
         }
     });
 }
@@ -298,6 +313,9 @@ app.listen(PORT, function () {
     fs.writeFile('jwt.key', process.env.JWT_CERT, function (err) {
         if (err) return console.log(err);
         console.log('jwt cert saved.')
+
+        //cheat with a pre-login of demo user for speed improvement
+        doLogin('paul.coleman@asme.org', '', {}, {end:function(){}})
     });
 });
 
