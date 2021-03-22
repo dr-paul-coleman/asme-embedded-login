@@ -127,20 +127,6 @@
             jsforce.browser.login();
         }
 
-        const extjslogin = function(user, passwd) {
-            $.ajax({
-                url: "/login",
-                type: "POST",
-                data: "username=" + user + '&password=' + passwd,
-                dataType: "text",
-                success: function(res, status, http) {
-                    if (res) {
-                        document.cookie = res.cookie;
-                        location = res.frontdoor;
-                    }
-                }
-            });
-        }
     </script>
 </body>
 </html>

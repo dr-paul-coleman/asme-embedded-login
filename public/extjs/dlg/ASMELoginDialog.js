@@ -244,7 +244,7 @@ Ext.define('ASME.view.LoginRegistrationDialog', {
         e.stopEvent();
         if ( e.getKey() === e.RETURN ) {
             if ( !Ext.isEmpty( textfield.getValue() ) && !Ext.isEmpty(textfield.up().queryById('wfLoginDlgUsernameField').getValue()) ) {
-                textfield.up().onLoginButtonClick();
+                Ext.getCmp('asmeLoginRegistrationDlg').onLoginButtonClick();
             }
         }
     },
@@ -261,77 +261,45 @@ Ext.define('ASME.view.LoginRegistrationDialog', {
     },
 
     onLoginButtonClick: function(button, e, eOpts) {
-        if ( sforce.rest ) {
+        Ext.defer( function() {
+            const me = Ext.getCmp('wfLoginDlg');
+            var username = me.queryById('wfLoginDlgUsernameField').getValue();
+            var passwd = me.queryById('wfLoginDlgPwdField').getValue();
+            if( !Ext.isEmpty(username) && !Ext.isEmpty(passwd) ) {
 
-            Ext.defer( function() {
-                const me = Ext.getCmp('wfLoginDlg');
-                var username = me.queryById('wfLoginDlgUsernameField').getValue();
-                var pwd = me.queryById('wfLoginDlgPwdField').getValue();
-                if( !Ext.isEmpty(username) && !Ext.isEmpty(pwd) ) {
+                me.setLoading('Revving up...');
 
-                    me.setLoading('Please wait...');
-
-                    var loginUrl = me.queryById('wfLoginDlgProdOrgRadio').checked? "https://login.salesforce.com": "https://test.salesforce.com";
-                    try {
-                        $rest.login( username, pwd, loginUrl, function(result,request) {
-                            const me = Ext.getCmp('wfLoginDlg');
-                            try {
-
-                                if (!result.loginFault) {
-                                    console.log("Good to Go");
-                                    var label = me.queryById('wfLoginDlgOrgLabel').getValue();
-                                    var resultObj = {};
-                                    resultObj[label] = result;
-                                    if (typeof me.callback === "function") {
-                                        me.callback(resultObj);
+                try {
+                    $.ajax({
+                        url: "/login",
+                        type: "POST",
+                        data: "username=" + username + '&password=' + passwd,
+                        dataType: "text",
+                        success: function(res, status, http) {
+                            if (res) {
+                                for (let key in res.cookie) {
+                                    if (res.cookie.hasOwnProperty(key)) {
+                                        document.cookie = key + '=' + res.cookie[key];
                                     }
-                                    me.hide();
-                                    me.close();
-                                } else {
-                                    Ext.Msg.show({
-                                        title:(result.loginFaultCode?result.loginFaultCode:"Login Failed"),
-                                        msg: (result.loginFault?result.loginFault:"") + '<br/><br/>Check Javascript Console for more errors.',
-                                        buttons: Ext.Msg.OK,
-                                        icon: Ext.Msg.ERROR
-                                    });
                                 }
-                            } finally {
-                                me.setLoading(false);
+                                location = res.frontdoor;
                             }
-                        });
-                    }catch(e){
-                        me.setLoading(false);
-                    }
-
-                } else {
-
-                    if (Ext.isEmpty(label)) {
-                        Ext.Msg.show({
-                            title:'Org Label Required',
-                            msg: 'Please provide a unique label for this set of org login credentials.',
-                            buttons: Ext.Msg.OK,
-                            icon: Ext.Msg.ERROR
-                        });
-                    } else {
-
-                        Ext.Msg.show({
-                            title:'Credentials Missing',
-                            msg: (Ext.isEmpty(username)?'Please enter a username.': 'Please enter a password.'),
-                            buttons: Ext.Msg.OK,
-                            icon: Ext.Msg.ERROR
-                        });
-                    }
+                        }
+                    });
+                }catch(e){
+                    me.setLoading(false);
                 }
-            },100);
 
-        } else {
-            Ext.Msg.show({
-                title:'Cannot Login',
-                msg: 'The Salesforce Rest API Javscript Library is not loaded properly.',
-                buttons: Ext.Msg.OK,
-                icon: Ext.Msg.ERROR
-            });
-        }
+            } else {
+
+                Ext.Msg.show({
+                    title:'Credentials Missing',
+                    msg: (Ext.isEmpty(username)?'Please enter a username.': 'Please enter a password.'),
+                    buttons: Ext.Msg.OK,
+                    icon: Ext.Msg.ERROR
+                });
+            }
+        },100);
     },
 
     onCancelRegistrationButtonClick: function(button, e, eOpts) {
