@@ -274,7 +274,7 @@ app.get('/logout', function(req, res){
 
 app.post('/login', function(req, res){
     
-    console.log("Login AJAX: Body Parser payload is..." + JSON.stringify(req));
+    console.log("Login AJAX: Body Parser payload is..." + JSON.stringify(req.body));
     const username = req.body.username;
     const password = req.body.password;
 
