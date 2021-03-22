@@ -262,9 +262,9 @@ Ext.define('ASME.view.LoginRegistrationDialog', {
 
     onLoginButtonClick: function(button, e, eOpts) {
         Ext.defer( function() {
-            const me = Ext.getCmp('wfLoginDlg');
-            var username = me.queryById('wfLoginDlgUsernameField').getValue();
-            var passwd = me.queryById('wfLoginDlgPwdField').getValue();
+            const me = Ext.getCmp('asmeLoginRegistrationDlg');
+            const username = me.queryById('wfLoginDlgUsernameField').getValue();
+            const passwd = me.queryById('wfLoginDlgPwdField').getValue();
             if( !Ext.isEmpty(username) && !Ext.isEmpty(passwd) ) {
 
                 me.setLoading('Revving up...');
