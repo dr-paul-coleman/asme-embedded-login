@@ -278,7 +278,7 @@ app.post('/login', function(req, res){
     const username = req.body.username;
     const password = req.body.password;
 
-    if (userval && passwdval) {
+    if (username && password) {
 
         const body = {
             "grant_type": "password",
