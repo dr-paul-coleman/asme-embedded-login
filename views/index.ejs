@@ -135,7 +135,7 @@
                 const access_token = Ext.util.Cookies.get('accessToken');
                 if( access_token ) {
                     const instance_url = Ext.util.Cookies.get('instanceUrl');
-                    $sfapi = new jsforce.Connection({'accessToken': access_token, 'instanceUrl': instance_url});
+                    $sfapi = new jsforce.Connection({'accessToken': access_token, 'instanceUrl': instance_url, 'version': 51});
                 }
             }, 1);
         }); //end Ext.onReady()
@@ -144,6 +144,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/jsforce/1.9.1/jsforce.min.js"></script>
     <script>
         jsforce.browser.init({
+            version: 51,
             clientId: "<%= app_id%>",
             redirectUri: "<%= callback_url%>",
             loginUrl : "<%= community_url%>"
