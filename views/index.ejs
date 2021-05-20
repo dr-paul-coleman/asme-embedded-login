@@ -143,32 +143,41 @@
 
     <script src="//cdnjs.cloudflare.com/ajax/libs/jsforce/1.9.1/jsforce.min.js"></script>
     <script>
-        jsforce.browser.init({
-            version: 51,
-            clientId: "<%= app_id%>",
-            redirectUri: "<%= callback_url%>",
-            loginUrl : "<%= community_url%>"
-        });
+        window.community_url = "<%= community_url %>";
+        try
+        {
+            jsforce.browser.init( {
+                version: 51,
+                clientId: "<%= app_id %>",
+                redirectUri: "<%= callback_url %>",
+                loginUrl: "<%= community_url %>"
+            } );
 
-        jsforce.browser.on('connect', function(conn) {
-            try
+            jsforce.browser.on( 'connect', function (conn)
             {
-                Ext.util.Cookies.set( 'accessToken', conn.accessToken );
-                Ext.util.Cookies.set( 'instanceURL', conn.instanceUrl );
-
-                conn.query( 'SELECT Id, FirstName, LastName, Account.Name FROM Contact', function (err, res)
+                try
                 {
-                    if ( err )
+                    Ext.util.Cookies.set( 'accessToken', conn.accessToken );
+                    Ext.util.Cookies.set( 'instanceURL', conn.instanceUrl );
+
+                    conn.query( 'SELECT Id, FirstName, LastName, Account.Name FROM Contact', function (err, res)
                     {
-                        return console.error( err );
-                    }
-                    console.log( res );
-                } );
-            } catch (ex)
-            {
-                console.error(ex);
-            }
-        });
+                        if ( err )
+                        {
+                            return console.error( err );
+                        }
+                        console.log( res );
+                    } );
+                }
+                catch ( ex )
+                {
+                    console.error( ex );
+                }
+            } );
+        } catch( jsfex )
+        {
+            console.error(jsfex);
+        }
 
     </script>
 </body>
