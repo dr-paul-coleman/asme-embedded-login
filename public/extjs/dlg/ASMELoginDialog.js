@@ -17,7 +17,7 @@ Ext.define('ASME.view.LoginRegistrationDialog', {
     width: 375,
     resizable: false,
     layout: 'fit',
-    title: 'ASME Sign In/Create Account',
+    title: 'GMAC Sign In/Create Account',
     modal: true,
 
     initComponent: function() {
@@ -43,7 +43,7 @@ Ext.define('ASME.view.LoginRegistrationDialog', {
                             fieldLabel: 'User Name',
                             labelWidth: 105,
                             tabIndex: 2,
-                            emptyText: 'e.g. user@asme.org'
+                            emptyText: 'e.g. user@gmac.com'
                         },
                             {
                                 xtype: 'textfield',
@@ -153,7 +153,7 @@ Ext.define('ASME.view.LoginRegistrationDialog', {
                                 fieldLabel: 'Email',
                                 labelWidth: 105,
                                 tabIndex: 2,
-                                emptyText: 'e.g. user@asme.org'
+                                emptyText: 'e.g. user@gmac.com'
                             },
                                 {
                                     xtype: 'textfield',
