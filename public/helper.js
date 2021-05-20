@@ -37,5 +37,5 @@ function onLogin(identity) {
 function onLogout() {
     if( typeof SFIDWidget !== 'undefined' ) SFIDWidget.init();
     console.log("Attempted to expire token and init. Redirecting...");
-    window.location= window.community_url + "/secur/logout.jsp?retUrl=https%3A%2F%2Fsdodemo-main-166ce2cf6b6-16b-179814ac144.force.com%2Findex";
+    window.location= "https://sdodemo-main-166ce2cf6b6-16b-179814ac144.force.com/secur/logout.jsp?retUrl=https%3A%2F%2Fsdodemo-main-166ce2cf6b6-16b-179814ac144.force.com%2Findex";
 }
