@@ -150,13 +150,23 @@
         });
 
         jsforce.browser.on('connect', function(conn) {
-            Ext.util.Cookies.set('accessToken');
-            Ext.util.Cookies.set('instanceURL');
+            try
+            {
+                Ext.util.Cookies.set( 'accessToken', conn.accessToken );
+                Ext.util.Cookies.set( 'instanceURL', conn.instanceUrl );
 
-            conn.query('SELECT Id, FirstName, LastName, Account.Name FROM Contact', function(err, res) {
-                if (err) { return console.error(err); }
-                console.log(res);
-            });
+                conn.query( 'SELECT Id, FirstName, LastName, Account.Name FROM Contact', function (err, res)
+                {
+                    if ( err )
+                    {
+                        return console.error( err );
+                    }
+                    console.log( res );
+                } );
+            } catch (ex)
+            {
+                console.error(ex);
+            }
         });
 
     </script>
